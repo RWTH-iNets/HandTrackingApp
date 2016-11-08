@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/configuration_label">
+
+    </PreferenceCategory>
+    <ListPreference
+        android:defaultValue="@string/configuration_sample_frequency_fastest"
+        android:title="@string/configuration_sample_frequency"
+        android:icon="@drawable/ic_timer_black_24dp"
+        android:entries="@array/sampleFrequencies"
+        android:entryValues="@array/sampleFrequencies"
+        android:key="sampling_frequency"
+        />
+</PreferenceScreen>
