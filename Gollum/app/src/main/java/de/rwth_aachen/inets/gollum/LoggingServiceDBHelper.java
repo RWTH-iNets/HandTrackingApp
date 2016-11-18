@@ -2,16 +2,33 @@ package de.rwth_aachen.inets.gollum;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.JsonWriter;
+
+import java.io.IOException;
+import java.io.StringWriter;
 
 
 final class LoggingServiceDBHelper extends SQLiteOpenHelper
 {
-    public static final String DATABASE_NAME = "LoggingService.db";
-    public static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "LoggingService.db";
+    private static final int DATABASE_VERSION = 1;
 
-    public LoggingServiceDBHelper(Context context)
+    private static LoggingServiceDBHelper sSingletonInstance = null;
+
+    public static LoggingServiceDBHelper getInstance(Context ctx)
+    {
+        if(sSingletonInstance == null)
+        {
+            sSingletonInstance = new LoggingServiceDBHelper(ctx);
+        }
+
+        return sSingletonInstance;
+    }
+
+    private LoggingServiceDBHelper(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -52,7 +69,113 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("description", Configuration.SessionName);
-        return (int)db.insert("log_sessions", null, values);
+        return db.insert("log_sessions", null, values);
+    }
+
+    public Cursor getAllSessionData()
+    {
+        SQLiteDatabase db = getReadableDatabase();
+
+        return db.rawQuery("SELECT " +
+                               "log_sessions.id AS _id, " +
+                               "log_sessions.description AS description, " +
+                               "strftime('%s', log_sessions.start_time) AS start_time, " +
+                               "MAX(log_entries.session_time) AS duration, " +
+                               "COUNT(*) AS num_events " +
+                           "FROM log_entries " +
+                           "INNER JOIN (" +
+                               "SELECT id, description, start_time " +
+                               "FROM log_sessions" +
+                           ") log_sessions " +
+                           "ON log_sessions.id = log_entries.session_id",
+                           null);
+    }
+
+    public void deleteSession(long SessionID)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+
+        db.delete("log_sessions", "id = ?", new String[]{String.valueOf(SessionID)});
+        db.delete("log_entries", "session_id = ?", new String[]{String.valueOf(SessionID)});
+    }
+
+    public String exportSessionToJSON(long SessionID) throws IOException
+    {
+        StringWriter output = new StringWriter();
+        JsonWriter json = new JsonWriter(output);
+        exportSessionToJSON(SessionID, json);
+        json.close();
+
+        return output.toString();
+    }
+
+    public void exportSessionToJSON(long SessionID, JsonWriter Writer) throws IOException
+    {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Writer.beginObject();
+
+        // Session information
+        Cursor cursor = db.query("log_sessions", new String[]{"description", "strftime('%s', start_time) AS start_time"}, "id = ?", new String[]{String.valueOf(SessionID)}, null, null, null);
+        if (cursor != null)
+        {
+            cursor.moveToFirst();
+            Writer.name("id").value(SessionID);
+            Writer.name("description").value(cursor.getString(cursor.getColumnIndex("description")));
+            Writer.name("start_time").value(cursor.getString(cursor.getColumnIndex("start_time")));
+            cursor.close();
+
+            // Session events
+            Writer.name("events");
+            Writer.beginArray();
+
+            cursor = db.query("log_entries", new String[]{"session_time", "type", "data_int_0", "data_float_0", "data_float_1", "data_float_2", "data_float_3"}, "session_id = ?", new String[]{String.valueOf(SessionID)}, null, null, null);
+            if (cursor != null)
+            {
+                int session_time_idx = cursor.getColumnIndex("session_time");
+                int type_idx = cursor.getColumnIndex("type");
+                int data_int_0_idx = cursor.getColumnIndex("data_int_0");
+                int data_float_0_idx = cursor.getColumnIndex("data_float_0");
+                int data_float_1_idx = cursor.getColumnIndex("data_float_1");
+                int data_float_2_idx = cursor.getColumnIndex("data_float_2");
+                int data_float_3_idx = cursor.getColumnIndex("data_float_3");
+
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext())
+                {
+                    Writer.beginObject();
+                    Writer.name("session_time").value(cursor.getLong(session_time_idx));
+                    switch (LoggingService.LogEventTypes.fromInt(cursor.getInt(type_idx)))
+                    {
+                        case LOG_STARTED:
+                            Writer.name("type").value("LOG_STARTED");
+                            break;
+                        case LOG_STOPPED:
+                            Writer.name("type").value("LOG_STOPPED");
+                            break;
+                        case ROTATION_VECTOR:
+                            Writer.name("type").value("ROTATION_VECTOR");
+                            Writer.name("quaternion");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.value(cursor.getFloat(data_float_3_idx));
+                            Writer.endArray();
+                            break;
+                        case SCREEN_ON_OFF:
+                            Writer.name("type").value("SCREEN_ON_OFF");
+                            Writer.name("is_on").value(cursor.getInt(data_int_0_idx) == 1);
+                            break;
+                    }
+                    Writer.endObject();
+                }
+
+                cursor.close();
+            }
+            Writer.endArray();
+        }
+
+        Writer.endObject();
     }
 
     public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type)

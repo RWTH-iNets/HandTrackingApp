@@ -7,7 +7,7 @@
     <string name="action_settings">Settings</string>
     <string name="nav_service_status">Service status</string>
     <string name="nav_settings">Settings</string>
-    <string name="nav_stats">Data stats</string>
+    <string name="nav_sessions">Recorded sessions</string>
     <string name="service_status_start">Start</string>
     <string name="service_status_service_not_running">Logging service is currently not running.</string>
     <string name="service_status_service_running">Logging service is running.</string>
@@ -33,4 +33,16 @@
     <string name="configuration_label">The preferences will be applied after restarting the logging service.</string>
     <string name="service_notification_title">Motion detection active</string>
     <string name="service_notification_text">Touch to end measurement.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="empty_session">Unnamed</string>
+    <string name="sec">sec</string>
+    <string name="action_export">Export</string>
+    <string name="action_delete">Delete</string>
+    <string name="sessions_export_error">Export failed.</string>
+    <string name="sessions_export_successful">Export successful.</string>
+    <string name="permission_dialog_thanks">Thank you for granting permission. Try exporting again please.</string>
+    <string name="permission_dialog_not_granted">The data can only be exported with the permission to write to external storage. Please try again.</string>
+    <string name="delete_successful">Session deleted.</string>
 </resources>

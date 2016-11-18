@@ -165,7 +165,7 @@ public class ServiceStatusFragment extends Fragment {
                 changeUIStatus(checkIsServiceRunning());
                 return true;
             default:
-                return  super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -173,7 +173,7 @@ public class ServiceStatusFragment extends Fragment {
     {
 
         LoggingServiceConfiguration config = new LoggingServiceConfiguration();
-        config.SessionName = DatabaseUtils.sqlEscapeString(sessionName);
+        config.SessionName = sessionName;
 
         Intent intent = new Intent(getActivity().getApplicationContext(), LoggingService.class);
         intent.putExtra(LoggingService.CONFIGURATION_TAG, config);

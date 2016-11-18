@@ -24,7 +24,6 @@ public class LoggingService extends Service implements SensorEventListener
     private SensorManager mSensorManager;
     private Sensor mRotationVectorSensor;
     private LoggingServiceConfiguration mConfiguration;
-    private LoggingServiceDBHelper mDBHelper;
     private long mCurrentLogSessionID;
     private long mCurrentLogSessionStartTime;
 
@@ -46,7 +45,24 @@ public class LoggingService extends Service implements SensorEventListener
         {
             return value;
         }
+
+        public static LogEventTypes fromInt(int value)
+        {
+            LogEventTypes[] values = values();
+            for(LogEventTypes type : values)
+            {
+                if(type.getValue() == value)
+                    return type;
+            }
+
+            return null;
+        }
     };
+
+    private LoggingServiceDBHelper getDBHelper()
+    {
+        return LoggingServiceDBHelper.getInstance(this);
+    }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver()
     {
@@ -56,10 +72,10 @@ public class LoggingService extends Service implements SensorEventListener
             switch(intent.getAction())
             {
                 case Intent.ACTION_SCREEN_ON:
-                    mDBHelper.insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.SCREEN_ON_OFF, 1);
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.SCREEN_ON_OFF, 1);
                     break;
                 case Intent.ACTION_SCREEN_OFF:
-                    mDBHelper.insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.SCREEN_ON_OFF, 0);
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.SCREEN_ON_OFF, 0);
                     break;
             }
         }
@@ -73,7 +89,7 @@ public class LoggingService extends Service implements SensorEventListener
     @Override
     public void onCreate()
     {
-        mDBHelper = new LoggingServiceDBHelper(this);
+
     }
 
     @Nullable
@@ -100,9 +116,9 @@ public class LoggingService extends Service implements SensorEventListener
         mSensorManager.registerListener(this, mRotationVectorSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         // Initialize log session
-        mCurrentLogSessionID = mDBHelper.insertLogSession(mConfiguration);
+        mCurrentLogSessionID = getDBHelper().insertLogSession(mConfiguration);
         mCurrentLogSessionStartTime = System.nanoTime();
-        mDBHelper.insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.LOG_STARTED);
+        getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.LOG_STARTED);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.drawable.ic_graphic_eq_black_24dp);
@@ -121,7 +137,7 @@ public class LoggingService extends Service implements SensorEventListener
     @Override
     public void onDestroy()
     {
-        mDBHelper.insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.LOG_STOPPED);
+        getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.LOG_STOPPED);
 
         unregisterReceiver(mBroadcastReceiver);
         mSensorManager.unregisterListener(this);
@@ -132,7 +148,7 @@ public class LoggingService extends Service implements SensorEventListener
     @Override
     public void onSensorChanged(SensorEvent sensorEvent)
     {
-        mDBHelper.insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.ROTATION_VECTOR, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2], sensorEvent.values[3]);
+        getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.ROTATION_VECTOR, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2], sensorEvent.values[3]);
     }
 
     @Override
