@@ -4,12 +4,14 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.database.DatabaseUtilsCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,24 +23,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ServiceStatusFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ServiceStatusFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ServiceStatusFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private OnFragmentInteractionListener mListener;
 
     public ServiceStatusFragment() {
@@ -49,16 +34,12 @@ public class ServiceStatusFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment ServiceStatusFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ServiceStatusFragment newInstance(String param1, String param2) {
+    public static ServiceStatusFragment newInstance() {
         ServiceStatusFragment fragment = new ServiceStatusFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -83,7 +64,7 @@ public class ServiceStatusFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_service_status, container, false);
 
         serviceStatus = (TextView)v.findViewById(R.id.textView_service_status);
-        sessionName = (EditText) v.findViewById(R.id.editText_sessionname);
+        sessionName = (EditText)v.findViewById(R.id.editText_sessionname);
 
         startStopButton = (Button)v.findViewById(R.id.service_status_startstopbutton);
         startStopButton.setOnClickListener(new View.OnClickListener() {
@@ -171,8 +152,7 @@ public class ServiceStatusFragment extends Fragment {
 
     private void startService(String sessionName)
     {
-
-        LoggingServiceConfiguration config = new LoggingServiceConfiguration();
+        LoggingServiceConfiguration config = new LoggingServiceConfiguration(PreferenceManager.getDefaultSharedPreferences(getActivity()));
         config.SessionName = sessionName;
 
         Intent intent = new Intent(getActivity().getApplicationContext(), LoggingService.class);

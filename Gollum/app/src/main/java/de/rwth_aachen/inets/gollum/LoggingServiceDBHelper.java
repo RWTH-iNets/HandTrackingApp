@@ -51,7 +51,9 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         sqLiteDatabase.execSQL("CREATE TABLE `log_sessions` (" +
                 "`id` INTEGER PRIMARY KEY," +
                 "`description` TEXT," +
-                "`start_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                "`start_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "`sampling_behavior` INTEGER," +
+                "`sampling_interval` INTEGER" +
                 ")");
     }
 
@@ -69,6 +71,8 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("description", Configuration.SessionName);
+        values.put("sampling_behavior", Configuration.SamplingBehavior.getValue());
+        values.put("sampling_interval", Configuration.SamplingInterval);
         return db.insert("log_sessions", null, values);
     }
 
@@ -77,18 +81,27 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         SQLiteDatabase db = getReadableDatabase();
 
         return db.rawQuery("SELECT " +
-                               "log_sessions.id AS _id, " +
-                               "log_sessions.description AS description, " +
-                               "strftime('%s', log_sessions.start_time) AS start_time, " +
-                               "MAX(log_entries.session_time) AS duration, " +
-                               "COUNT(*) AS num_events " +
-                           "FROM log_entries " +
-                           "INNER JOIN (" +
-                               "SELECT id, description, start_time " +
-                               "FROM log_sessions" +
-                           ") log_sessions " +
-                           "ON log_sessions.id = log_entries.session_id",
-                           null);
+                                "log_sessions.id AS _id, " +
+                                "log_sessions.description AS description, " +
+                                "strftime('%s', log_sessions.start_time) AS start_time, " +
+                                "(" +
+                                    "SELECT " +
+                                        "MAX(session_time) " +
+                                    "FROM " +
+                                        "log_entries " +
+                                    "WHERE " +
+                                        "session_id = log_sessions.id" +
+                                ") AS duration, " +
+                                "(" +
+                                    "SELECT " +
+                                        "COUNT(*) " +
+                                    "FROM " +
+                                        "log_entries " +
+                                    "WHERE " +
+                                        "session_id = log_sessions.id" +
+                                ") AS num_events " +
+                            "FROM " +
+                                "log_sessions", null);
     }
 
     public void deleteSession(long SessionID)
@@ -116,13 +129,23 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         Writer.beginObject();
 
         // Session information
-        Cursor cursor = db.query("log_sessions", new String[]{"description", "strftime('%s', start_time) AS start_time"}, "id = ?", new String[]{String.valueOf(SessionID)}, null, null, null);
+        Cursor cursor = db.query("log_sessions", new String[]{"description", "strftime('%s', start_time) AS start_time", "sampling_behavior", "sampling_interval"}, "id = ?", new String[]{String.valueOf(SessionID)}, null, null, null);
         if (cursor != null)
         {
             cursor.moveToFirst();
             Writer.name("id").value(SessionID);
             Writer.name("description").value(cursor.getString(cursor.getColumnIndex("description")));
             Writer.name("start_time").value(cursor.getString(cursor.getColumnIndex("start_time")));
+            Writer.name("sampling_interval").value(cursor.getInt(cursor.getColumnIndex("sampling_interval")));
+            switch(LoggingServiceConfiguration.SamplingBehaviors.fromInt(cursor.getInt(cursor.getColumnIndex("sampling_behavior"))))
+            {
+                case ALWAYS_ON:
+                    Writer.name("sampling_behavior").value("ALWAYS_ON");
+                    break;
+                case SCREEN_ON:
+                    Writer.name("sampling_behavior").value("SCREEN_ON");
+                    break;
+            }
             cursor.close();
 
             // Session events

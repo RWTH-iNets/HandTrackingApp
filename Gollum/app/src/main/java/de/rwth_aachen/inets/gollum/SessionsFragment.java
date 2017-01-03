@@ -95,8 +95,7 @@ public class SessionsFragment extends Fragment {
                 }
                 Toast.makeText(getContext(), getString(R.string.delete_successful), Toast.LENGTH_SHORT).show();
 
-                if(adapter != null)
-                    adapter.notifyDataSetChanged();
+                adapter.changeCursor(LoggingServiceDBHelper.getInstance(getActivity().getApplicationContext()).getAllSessionData());
                 return true;
 
             case R.id.action_export:
@@ -153,10 +152,12 @@ public class SessionsFragment extends Fragment {
         JsonWriter json = new JsonWriter(writer);
 
         try {
+            json.beginArray();
             for(long id : ids)
             {
                 LoggingServiceDBHelper.getInstance(getActivity().getApplicationContext()).exportSessionToJSON(id, json);
             }
+            json.endArray();
             writer.close();
         } catch (IOException e) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -254,8 +255,9 @@ public class SessionsFragment extends Fragment {
             }
             catch(Exception ex) { }
 
-            ((TextView)view.findViewById(android.R.id.text1)).setText(description == null || description.isEmpty() ? "< " + getResources().getString(R.string.empty_session) + " >" : description);
-            ((TextView)view.findViewById(android.R.id.text2)).setText(start_time + " (" + String.valueOf(duration / 1000000000) + " " + getResources().getString(R.string.sec) + ")");
+            SessionListItem item = (SessionListItem)view;
+            item.titleText.setText(description == null || description.isEmpty() ? "< " + getResources().getString(R.string.empty_session) + " >" : description);
+            item.subTitleText.setText(start_time + " (" + String.valueOf(duration / 1000000000) + " " + getResources().getString(R.string.sec) + ")");
         }
     }
 
@@ -271,8 +273,8 @@ public class SessionsFragment extends Fragment {
             super(context);
             LayoutInflater inflater = LayoutInflater.from(context);
             v = inflater.inflate(R.layout.sessions_list_item, this, true); // TODO must be (R... , parent, false)
-            titleText = (TextView) v.findViewById(android.R.id.text1);
-            subTitleText = (TextView) v.findViewById(android.R.id.text2);
+            titleText = (TextView) v.findViewById(R.id.list_text1);
+            subTitleText = (TextView) v.findViewById(R.id.list_text2);
             checkBox = (CheckBox) v.findViewById(R.id.sessions_list_checkbox);
 
         }

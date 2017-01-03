@@ -14,11 +14,15 @@ class SQLiteDatabase:
         return [int(row[0]) for row in rows]
 
     @staticmethod
-    def _logsession_from_db(session_id, description, start_time):
-        return LogSession(session_id, description, start_time)
+    def _logsession_from_db(session_id, description, start_time, sampling_behavior, sampling_interval):
+        sampling_behaviors = {
+            0: 'ALWAYS_ON',
+            1: 'SCREEN_ON',
+        }
+        return LogSession(session_id, description, start_time, sampling_behaviors[sampling_behavior], sampling_interval / 1000)
 
     def get_session(self, session_id):
-        rows = self.cursor.execute('SELECT description, start_time FROM log_sessions WHERE id={}'.format(session_id))
+        rows = self.cursor.execute('SELECT description, start_time, sampling_behavior, sampling_interval FROM log_sessions WHERE id={}'.format(session_id))
         
         if rows:
             session = self._logsession_from_db(session_id, *rows.fetchone())

@@ -20,13 +20,13 @@
         android:layout_height="match_parent"
         android:background="?android:attr/activatedBackgroundIndicator"
         android:mode="twoLine">
-        <TextView android:id="@android:id/text1"
+        <TextView android:id="@+id/list_text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="?android:attr/listPreferredItemPaddingStart"
             android:layout_marginTop="6dip" android:text="asdfdsa"
             android:textAppearance="?android:attr/textAppearanceListItem" />
-        <TextView android:id="@android:id/text2"
+        <TextView android:id="@+id/list_text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:text="asdfew"
             android:layout_marginStart="?android:attr/listPreferredItemPaddingStart"

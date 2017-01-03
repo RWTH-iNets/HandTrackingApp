@@ -14,7 +14,7 @@ class JSONDatabase:
                             
     @staticmethod
     def _logsession_from_json(session_data):
-        session = LogSession(int(session_data['id']), session_data['description'], session_data['start_time'])
+        session = LogSession(int(session_data['id']), session_data['description'], session_data['start_time'], session_data['sampling_behavior'], session_data['sampling_interval'] / 1000)
         session.events = [JSONDatabase._logevent_from_json(event_data) for event_data in session_data['events']]
         return session
 

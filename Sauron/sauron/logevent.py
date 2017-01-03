@@ -1,4 +1,5 @@
-from math3d import UnitQuaternion
+import numpy as np
+import quaternion
 
 
 class LogEventBase:
@@ -19,7 +20,7 @@ class LogStoppedEvent(LogEventBase):
 class RotationVectorEvent(LogEventBase):
     def __init__(self, session_time, x, y, z, w):
         super().__init__(session_time)
-        self.quaternion = UnitQuaternion(x, y, z, w)
+        self.quaternion = np.quaternion(w, x, y, z)
 
 
 class ScreenOnOffEvent(LogEventBase):

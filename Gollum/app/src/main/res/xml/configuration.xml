@@ -5,11 +5,27 @@
 
     </PreferenceCategory>
     <ListPreference
-        android:defaultValue="@string/configuration_sample_frequency_fastest"
-        android:title="@string/configuration_sample_frequency"
+        android:defaultValue="@string/configuration_sampling_interval_default"
+        android:title="@string/configuration_sampling_interval"
         android:icon="@drawable/ic_timer_black_24dp"
-        android:entries="@array/sampleFrequencies"
-        android:entryValues="@array/sampleFrequencies"
-        android:key="sampling_frequency"
+        android:entries="@array/sampling_interval_entries"
+        android:entryValues="@array/sampling_interval_values"
+        android:key="sampling_interval"
+        />
+    <ListPreference
+        android:defaultValue="@string/configuration_logging_behavior_default"
+        android:title="@string/configuration_logging_behavior"
+        android:icon="@drawable/ic_battery_charging_50_black_24dp"
+        android:entries="@array/logging_behavior_entries"
+        android:entryValues="@array/logging_behavior_values"
+        android:key="logging_behavior"
+        />
+    <ListPreference
+        android:defaultValue="@string/configuration_preprocessing_default"
+        android:title="@string/configuration_preprocessing"
+        android:icon="@drawable/ic_settings_black_24dp"
+        android:entries="@array/preprocessing_entries"
+        android:entryValues="@array/preprocessing_values"
+        android:key="preprocessing"
         />
 </PreferenceScreen>

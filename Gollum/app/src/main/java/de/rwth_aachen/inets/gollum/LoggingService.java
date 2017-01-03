@@ -73,9 +73,20 @@ public class LoggingService extends Service implements SensorEventListener
             {
                 case Intent.ACTION_SCREEN_ON:
                     getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.SCREEN_ON_OFF, 1);
+
+                    if(mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON)
+                    {
+                        startLoggingSensors();
+                    }
                     break;
+
                 case Intent.ACTION_SCREEN_OFF:
                     getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.SCREEN_ON_OFF, 0);
+
+                    if(mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON)
+                    {
+                        stopLoggingSensors();
+                    }
                     break;
             }
         }
@@ -113,7 +124,7 @@ public class LoggingService extends Service implements SensorEventListener
         // Initialize RotationVector sensor
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
-        mSensorManager.registerListener(this, mRotationVectorSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        startLoggingSensors();
 
         // Initialize log session
         mCurrentLogSessionID = getDBHelper().insertLogSession(mConfiguration);
@@ -139,10 +150,20 @@ public class LoggingService extends Service implements SensorEventListener
     {
         getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.LOG_STOPPED);
 
+        stopLoggingSensors();
         unregisterReceiver(mBroadcastReceiver);
-        mSensorManager.unregisterListener(this);
 
         stopForeground(true);
+    }
+
+    private void startLoggingSensors()
+    {
+        mSensorManager.registerListener(this, mRotationVectorSensor, mConfiguration.SamplingInterval);
+    }
+
+    private void stopLoggingSensors()
+    {
+        mSensorManager.unregisterListener(this);
     }
 
     @Override

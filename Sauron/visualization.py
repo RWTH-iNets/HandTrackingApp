@@ -1,37 +1,43 @@
-import sys, math, pygame, math3d, time
+import sys, math, pygame, time
+import numpy as np
+import quaternion
 from operator import itemgetter
 
 import sauron.io
 from sauron.logevent import RotationVectorEvent
+from sauron.vector3 import Vector3
+from sauron.quaternion_math import rotate
 
 
 class Cuboid:
     def __init__(self, width, height, depth):
         self.vertices = [
-            math3d.Vector(-depth/2,width/2,-height/2),
-            math3d.Vector(depth/2,width/2,-height/2),
-            math3d.Vector(depth/2,-width/2,-height/2),
-            math3d.Vector(-depth/2,-width/2,-height/2),
-            math3d.Vector(-depth/2,width/2,height/2),
-            math3d.Vector(depth/2,width/2,height/2),
-            math3d.Vector(depth/2,-width/2,height/2),
-            math3d.Vector(-depth/2,-width/2,height/2)
+            Vector3(-depth/2,  width/2, -height/2),
+            Vector3( depth/2,  width/2, -height/2),
+            Vector3( depth/2, -width/2, -height/2),
+            Vector3(-depth/2, -width/2, -height/2),
+            Vector3(-depth/2,  width/2,  height/2),
+            Vector3( depth/2,  width/2,  height/2),
+            Vector3( depth/2, -width/2,  height/2),
+            Vector3(-depth/2, -width/2,  height/2)
         ]
+
         self.faces  = [
-            (0,1,2,3),
-            (1,5,6,2),
-            (5,4,7,6),
-            (4,0,3,7),
-            (0,4,5,1),
-            (3,2,6,7)
+            (0, 1, 2, 3),
+            (1, 5, 6, 2),
+            (5, 4, 7, 6),
+            (4, 0, 3, 7),
+            (0, 4, 5, 1),
+            (3, 2, 6, 7)
         ]
+
         self.colors = [
-            (255,0,255),
-            (255,0,0),
-            (0,255,0),
-            (0,0,255),
-            (0,255,255),
-            (255,255,0)
+            (255,   0, 255),
+            (255,   0,   0),
+            (  0, 255,   0),
+            (  0,   0, 255),
+            (  0, 255, 255),
+            (255, 255,   0)
         ]
 
 
@@ -55,7 +61,7 @@ class Simulation:
         factor = fov / (viewer_distance + v.x)
         z = v.z * factor + self.screen.get_width() / 2
         y = -v.y * factor + self.screen.get_height() / 2
-        return math3d.Vector(z, y, v.x)
+        return Vector3(z, y, v.x)
 
     def run(self):
         starttime = time.clock();
@@ -70,7 +76,7 @@ class Simulation:
             self.screen.fill((0,32,0))
 
             # Transform and project vertices
-            t = [self.project_point(self.get_current_model_transform(time.clock() - starttime) * v, 256, 4) for v in self.model.vertices]
+            t = [self.project_point(rotate(self.get_current_model_transform(time.clock() - starttime), v), 256, 40) for v in self.model.vertices]
 
             # Calculate the average Z values of each face.
             avg_z = []
@@ -97,13 +103,7 @@ class Simulation:
             pygame.display.flip()
 
     def get_current_model_transform(self, simulation_time):
-        prev_rotvec_event_idx = None
-        for idx, log_event in enumerate(self.log_session.events):
-            if isinstance(log_event, RotationVectorEvent):
-                if log_event.session_time > simulation_time:
-                    return (log_event if prev_rotvec_event_idx is None else self.log_session.events[prev_rotvec_event_idx]).quaternion
-                prev_rotvec_event_idx = idx
-        return self.log_session.events[prev_rotvec_event_idx].quaternion if prev_rotvec_event_idx is not None else None
+        return self.log_session.events[self.log_session.get_nearest_event_index(simulation_time, RotationVectorEvent)].quaternion           
 
 
 if __name__ == "__main__":

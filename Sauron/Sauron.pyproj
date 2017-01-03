@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>3b376784-fa4a-4a78-856e-7c0109fe4d6c</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>main.py</StartupFile>
+    <StartupFile>visualization.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,6 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="angular_velocities.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="main.py" />
     <Compile Include="sauron\io\json.py">
       <SubType>Code</SubType>
@@ -36,6 +39,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="sauron\logsession.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="sauron\quaternion_math.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="sauron\vector3.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="sauron\__init__.py" />
