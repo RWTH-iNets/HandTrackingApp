@@ -38,9 +38,9 @@ def upload(request, uid="", command="", ul_session_id="", ul_chunk_offset=-1):
           return JsonResponse({'status': 'OK'})
   else:
     if command == "new":
-      user = User.objects.get(signed_id=uid)
-
-      if user is None:
+      try:
+        user = User.objects.get(signed_id=uid)
+      except:
         return JsonResponse({'status': 'ERROR'})
 
       ul_sess = UploadSession(user=user)
