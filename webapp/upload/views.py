@@ -47,7 +47,8 @@ def upload(request, uid="", command="", ul_session_id="", ul_chunk_offset=-1):
       ul_sess.save()
       ul_sess.generate_signed_id()
       ul_sess.save()
-      response = JsonResponse({'upload_session_id': ul_sess.signed_id})
+      response = JsonResponse({'status': 'OK',
+                               'upload_session_id': ul_sess.signed_id})
       return response
 
     if command == "done":
@@ -128,5 +129,6 @@ def register(request, model):
     new_user.save()
     new_user.generate_signed_id()
     new_user.save()
-    response = JsonResponse({'user_id': new_user.signed_id})
+    response = JsonResponse({'user_id': new_user.signed_id,
+                             'status': 'OK'})
     return response
