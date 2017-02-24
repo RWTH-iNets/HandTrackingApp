@@ -12,7 +12,7 @@ import base64
 
 # Create your views here.
 @ensure_csrf_cookie
-def upload(request, uid="", command="", ul_session_id="", ul_chunk_offset=-1):
+def upload(request, command="", uid="", ul_session_id="", ul_chunk_offset=-1):
   context = {}
   print("request: upload")
   print("params: " + uid + ", " + command + ", " + ul_session_id + ", " +
