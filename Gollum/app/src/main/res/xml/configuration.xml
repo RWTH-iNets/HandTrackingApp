@@ -5,7 +5,7 @@
 
     </PreferenceCategory>
     <ListPreference
-        android:defaultValue="@string/configuration_sampling_interval_default"
+        android:defaultValue="50ms"
         android:title="@string/configuration_sampling_interval"
         android:icon="@drawable/ic_timer_black_24dp"
         android:entries="@array/sampling_interval_entries"

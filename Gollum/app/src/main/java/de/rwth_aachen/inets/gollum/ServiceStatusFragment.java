@@ -6,12 +6,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DatabaseUtils;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.database.DatabaseUtilsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +24,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.util.List;
 
 
 public class ServiceStatusFragment extends Fragment {
@@ -71,6 +76,35 @@ public class ServiceStatusFragment extends Fragment {
             @Override
             public void onClick(View view)
             {
+                // Initialize RotationVector sensor
+                SensorManager mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+
+                List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+                Boolean game_sensor_found = false;
+                for(Sensor s:sensors){
+                    Log.e("WARN", s.getVendor().toString());
+                    Log.e("WARN", Integer.toString(s.getVersion()));
+                    Log.e("WARN", Integer.toString(s.getType()));
+                    //Log.e("WARN", s.getStringType());
+                    if(
+                            s.getType() == Sensor.TYPE_GAME_ROTATION_VECTOR ||
+                            s.getType() == Sensor.TYPE_ROTATION_VECTOR ||
+                            s.getType() == Sensor.TYPE_GYROSCOPE ||
+                            s.getType() == Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR
+                      ) {
+                        game_sensor_found = true;
+                    }
+                }
+
+                if(!game_sensor_found) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setMessage("Missing required sensor!")
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
+                    return;
+                }
+
                 if(isServiceRunning)
                 {
                     if(checkIsServiceRunning() != isServiceRunning)
@@ -157,7 +191,6 @@ public class ServiceStatusFragment extends Fragment {
 
         Intent intent = new Intent(getActivity().getApplicationContext(), LoggingService.class);
         intent.putExtra(LoggingService.CONFIGURATION_TAG, config);
-
 
         getActivity().startService(intent);
     }

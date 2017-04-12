@@ -14,6 +14,13 @@ import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
+import android.util.JsonReader;
+import android.util.Log;
+
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
 
 public class LoggingService extends Service implements SensorEventListener
 {
@@ -32,11 +39,13 @@ public class LoggingService extends Service implements SensorEventListener
         LOG_STARTED(0),
         LOG_STOPPED(1),
         ROTATION_VECTOR(2),
-        SCREEN_ON_OFF(3);
+        SCREEN_ON_OFF(3),
+        GAME_ROTATION_VECTOR(4),
+        GYRO(5);
 
         private final int value;
 
-        private LogEventTypes(int value)
+        LogEventTypes(int value)
         {
             this.value = value;
         }
@@ -123,13 +132,28 @@ public class LoggingService extends Service implements SensorEventListener
 
         // Initialize RotationVector sensor
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
         mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
-        startLoggingSensors();
+        if (mRotationVectorSensor == null){
+            if (mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null){
+                mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+            }
+            else{
+                mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+            }
+        }
+
+        if(mRotationVectorSensor == null) {
+            //Ouups
+        }
 
         // Initialize log session
         mCurrentLogSessionID = getDBHelper().insertLogSession(mConfiguration);
         mCurrentLogSessionStartTime = System.nanoTime();
         getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.LOG_STARTED);
+
+        //this needs to happen after session created
+        startLoggingSensors();
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.drawable.ic_graphic_eq_black_24dp);
@@ -148,10 +172,11 @@ public class LoggingService extends Service implements SensorEventListener
     @Override
     public void onDestroy()
     {
-        getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.LOG_STOPPED);
-
         stopLoggingSensors();
         unregisterReceiver(mBroadcastReceiver);
+
+        //this needs to come after listeners have been detached.
+        getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.LOG_STOPPED);
 
         stopForeground(true);
     }
@@ -169,7 +194,28 @@ public class LoggingService extends Service implements SensorEventListener
     @Override
     public void onSensorChanged(SensorEvent sensorEvent)
     {
-        getDBHelper().insertLogEntry(mCurrentLogSessionID, getCurrentSessionTime(), LogEventTypes.ROTATION_VECTOR, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2], sensorEvent.values[3]);
+        int type = sensorEvent.sensor.getType();
+        LogEventTypes log_event_type = LogEventTypes.ROTATION_VECTOR;
+
+        if(type == Sensor.TYPE_GAME_ROTATION_VECTOR) {
+            log_event_type = LogEventTypes.GAME_ROTATION_VECTOR;
+        }
+        if(type == Sensor.TYPE_GYROSCOPE) {
+            log_event_type = LogEventTypes.GYRO;
+        }
+
+        //first three elements are last three elements of a unit quaternion. 4th element is optional
+        //we want to use event time not the time when the data is stored => use sensorEvent.timestamp
+        if(sensorEvent.values.length == 4) {
+            getDBHelper().insertLogEntry(mCurrentLogSessionID, sensorEvent.timestamp,
+                    log_event_type, sensorEvent.values[0], sensorEvent.values[1],
+                    sensorEvent.values[2], sensorEvent.values[3]);
+        } else {
+            getDBHelper().insertLogEntry(mCurrentLogSessionID, sensorEvent.timestamp,
+                    log_event_type, sensorEvent.values[0], sensorEvent.values[1],
+                    sensorEvent.values[2], 0);
+        }
+
     }
 
     @Override
@@ -182,4 +228,6 @@ public class LoggingService extends Service implements SensorEventListener
     {
         return System.nanoTime() - mCurrentLogSessionStartTime;
     }
+
+
 }
