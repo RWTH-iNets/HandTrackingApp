@@ -42,7 +42,7 @@ class Cuboid:
 
 
 class Simulation:
-    def __init__(self, win_width = 640, win_height = 480):
+    def __init__(self, win_width = 1920, win_height = 1080):
         # Initialize pygame
         pygame.init()
         self.screen = pygame.display.set_mode((win_width, win_height))
@@ -50,7 +50,7 @@ class Simulation:
         self.clock = pygame.time.Clock()
 
         # Open database
-        self.database = sauron.io.load('LoggingService.db');
+        self.database = sauron.io.load('rotate_phone.json');
         self.log_session = self.database.get_session(self.database.get_all_session_ids()[0])
 
         # Create our model using the dimensions of a LG G4 phone (in cm)
@@ -76,7 +76,7 @@ class Simulation:
             self.screen.fill((0,32,0))
 
             # Transform and project vertices
-            t = [self.project_point(rotate(self.get_current_model_transform(time.clock() - starttime), v), 256, 40) for v in self.model.vertices]
+            t = [self.project_point(rotate(self.get_current_model_transform(time.clock() - starttime), v), 5000, 100) for v in self.model.vertices]
 
             # Calculate the average Z values of each face.
             avg_z = []
@@ -103,7 +103,8 @@ class Simulation:
             pygame.display.flip()
 
     def get_current_model_transform(self, simulation_time):
-        return self.log_session.events[self.log_session.get_nearest_event_index(simulation_time, RotationVectorEvent)].quaternion           
+        simulation_time = simulation_time % self.log_session.events[-1].session_time
+        return self.log_session.events[self.log_session.get_nearest_event_index(simulation_time, RotationVectorEvent)].quaternion
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import os
 
-from .json import JSONDatabase
-from .sqlite3 import SQLiteDatabase
+from .json_io import JSONDatabase
+from .sqlite3_io import SQLiteDatabase
 
 
 def load(filepath):
