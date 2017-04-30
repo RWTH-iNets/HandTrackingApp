@@ -1,6 +1,6 @@
 import json
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent
 from ..logsession import LogSession
 
 
@@ -27,6 +27,9 @@ class JSONDatabase:
             'LOG_STOPPED': lambda: LogStoppedEvent(session_time),
             'ROTATION_VECTOR': lambda: RotationVectorEvent(session_time, *event_data['quaternion']),
             'SCREEN_ON_OFF': lambda: ScreenOnOffEvent(session_time, event_data['is_on']),
+            'GAME_ROTATION_VECTOR': lambda: GameRotationVectorEvent(session_time, *event_data['quaternion']),
+            'GYROSCOPE': lambda: GyroscopeEvent(session_time, *event_data['vector']),
+            'ACCELEROMETER': lambda: AccelerometerEvent(session_time, *event_data['vector']),
         }
 
         return handler_map[event_data['type']]()
