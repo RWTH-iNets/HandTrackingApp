@@ -301,6 +301,34 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.name("type").value("SCREEN_ON_OFF");
                             Writer.name("is_on").value(cursor.getInt(data_int_0_idx) == 1);
                             break;
+                        case GAME_ROTATION_VECTOR:
+                            Writer.name("type").value("GAME_ROTATION_VECTOR");
+                            Writer.name("quaternion");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.value(cursor.getFloat(data_float_3_idx));
+                            Writer.endArray();
+                            break;
+                        case GYROSCOPE:
+                            Writer.name("type").value("GYROSCOPE");
+                            Writer.name("vector");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.endArray();
+                            break;
+                        case ACCELEROMETER:
+                            Writer.name("type").value("ACCELEROMETER");
+                            Writer.name("vector");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.endArray();
+                            break;
                     }
                     Writer.endObject();
                     i++;
@@ -445,6 +473,34 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                         case SCREEN_ON_OFF:
                             Writer.name("type").value("SCREEN_ON_OFF");
                             Writer.name("is_on").value(cursor.getInt(data_int_0_idx) == 1);
+                            break;
+                        case GAME_ROTATION_VECTOR:
+                            Writer.name("type").value("GAME_ROTATION_VECTOR");
+                            Writer.name("quaternion");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.value(cursor.getFloat(data_float_3_idx));
+                            Writer.endArray();
+                            break;
+                        case GYROSCOPE:
+                            Writer.name("type").value("GYROSCOPE");
+                            Writer.name("vector");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.endArray();
+                            break;
+                        case ACCELEROMETER:
+                            Writer.name("type").value("ACCELEROMETER");
+                            Writer.name("vector");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.endArray();
                             break;
                     }
                     Writer.endObject();
