@@ -1,0 +1,5 @@
+TYPE_GAME_ROTATION_VECTOR instead of TYPE_ROTATION_VECTOR, because https://developer.android.com/guide/topics/sensors/sensors_position.html#sensors-pos-orient
+"Because the game rotation vector sensor does not use the magnetic field, relative rotations are more accurate, and not impacted by magnetic field changes. Use this sensor in a game if you do not care about where north is, and the normal rotation vector does not fit your needs because of its reliance on the magnetic field."
+
+
+logging as foreground service in order to ensure not being killed by the system at any point

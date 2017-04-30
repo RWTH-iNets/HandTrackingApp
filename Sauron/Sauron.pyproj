@@ -26,10 +26,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="main.py" />
-    <Compile Include="sauron\io\json.py">
+    <Compile Include="sauron\io\json_io.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="sauron\io\sqlite3.py">
+    <Compile Include="sauron\io\sqlite3_io.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="sauron\io\__init__.py">
