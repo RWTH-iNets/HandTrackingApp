@@ -1,6 +1,6 @@
 import json
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent
 from ..logsession import LogSession
 
 
@@ -27,6 +27,14 @@ class JSONDatabase:
             'LOG_STOPPED': lambda: LogStoppedEvent(session_time),
             'ROTATION_VECTOR': lambda: RotationVectorEvent(session_time, *event_data['quaternion']),
             'SCREEN_ON_OFF': lambda: ScreenOnOffEvent(session_time, event_data['is_on']),
+            'GAME_ROTATION_VECTOR': lambda: GameRotationVectorEvent(session_time, *event_data['quaternion']),
+            'GYROSCOPE': lambda: GyroscopeEvent(session_time, *event_data['vector']),
+            'ACCELEROMETER': lambda: AccelerometerEvent(session_time, *event_data['vector']),
+            'MAGNETOMETER': lambda: MagnetometerEvent(session_time, *event_data['vector']),
+            'PROXIMITY': lambda: ProximitySensorEvent(session_time, event_data['value'] / 100), # distance stored as cm
+            'LIGHT': lambda: LightSensorEvent(session_time, event_data['value']),
+            'PRESSURE': lambda: PressureSensorEvent(session_time, event_data['value'] * 100), # pressure stored as hPa
+            'AMBIENT_TEMPERATURE': lambda: AmbientTemperatureSensorEvent(session_time, event_data['value']),
         }
 
         return handler_map[event_data['type']]()

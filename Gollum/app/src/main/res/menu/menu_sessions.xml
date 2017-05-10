@@ -8,9 +8,16 @@
         android:icon="@drawable/ic_delete_black_24dp"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/action_mv_db"
+        android:orderInCategory="200"
+        android:title="@string/action_upload"
+        android:icon="@drawable/ic_share_black_24dp"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_export"
         android:orderInCategory="200"
         android:title="@string/action_export"
         android:icon="@drawable/ic_share_black_24dp"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
+
 </menu>

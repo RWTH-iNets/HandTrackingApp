@@ -1,6 +1,6 @@
 import sqlite3
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent
 from ..logsession import LogSession
 
 
@@ -41,6 +41,14 @@ class SQLiteDatabase:
             1: lambda: LogStoppedEvent(session_time),
             2: lambda: RotationVectorEvent(session_time, data_float_0, data_float_1, data_float_2, data_float_3),
             3: lambda: ScreenOnOffEvent(session_time, data_int_0 == 1),
+            4: lambda: GameRotationVectorEvent(session_time, data_float_0, data_float_1, data_float_2, data_float_3),
+            5: lambda: GyroscopeEvent(session_time, data_float_0, data_float_1, data_float_2),
+            6: lambda: AccelerometerEvent(session_time, data_float_0, data_float_1, data_float_2),
+            7: lambda: MagnetometerEvent(session_time, data_float_0, data_float_1, data_float_2),
+            8: lambda: ProximitySensorEvent(session_time, data_float_0 / 100), # distance stored as cm
+            9: lambda: LightSensorEvent(session_time, data_float_0),
+            10: lambda: PressureSensorEvent(session_time, data_float_0 * 100), # pressure stored as hPa
+            11: lambda: AmbientTemperatureSensorEvent(session_time, data_float_0),
         }
 
         return handler_map[event_type]()

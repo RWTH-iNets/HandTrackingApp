@@ -1,10 +1,17 @@
 <resources>
+    <string name="backend_endpoint_new">134.130.223.128/upload/new/</string>
+    <string name="backend_endpoint_add">134.130.223.128/upload/chunk/</string>
+    <string name="backend_endpoint_done">134.130.223.128/upload/done/</string>
+    <string name="backend_endpoint_register">134.130.223.128/upload/register/</string>
+    <string name="backend_endpoint_token">134.130.223.128/upload/token/</string>
+
     <string name="app_name">Gollum</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="action_upload">Move all to Server</string>
     <string name="nav_service_status">Service status</string>
     <string name="nav_settings">Settings</string>
     <string name="nav_sessions">Recorded sessions</string>
@@ -48,6 +55,8 @@
     <string name="action_delete">Delete</string>
     <string name="sessions_export_error">Export failed.</string>
     <string name="sessions_export_successful">Export successful.</string>
+    <string name="sessions_upload_successful">Upload successful.</string>
+    <string name="sessions_upload_error">Error while uploading session.</string>
     <string name="permission_dialog_thanks">Thank you for granting permission. Try exporting again please.</string>
     <string name="permission_dialog_not_granted">The data can only be exported with the permission to write to external storage. Please try again.</string>
     <string name="delete_successful">Session(s) deleted.</string>
