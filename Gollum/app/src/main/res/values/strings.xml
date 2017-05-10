@@ -1,13 +1,20 @@
 <resources>
+    <string name="backend_endpoint_new">134.130.223.128/upload/new/</string>
+    <string name="backend_endpoint_add">134.130.223.128/upload/chunk/</string>
+    <string name="backend_endpoint_done">134.130.223.128/upload/done/</string>
+    <string name="backend_endpoint_register">134.130.223.128/upload/register/</string>
+    <string name="backend_endpoint_token">134.130.223.128/upload/token/</string>
+
     <string name="app_name">Gollum</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="action_upload">Move all to Server</string>
     <string name="nav_service_status">Service status</string>
     <string name="nav_settings">Settings</string>
-    <string name="nav_stats">Data stats</string>
+    <string name="nav_sessions">Recorded sessions</string>
     <string name="service_status_start">Start</string>
     <string name="service_status_service_not_running">Logging service is currently not running.</string>
     <string name="service_status_service_running">Logging service is running.</string>
@@ -15,9 +22,15 @@
     <string name="service_status_stop">Stop</string>
     <string name="service_status_dialog_stopped">The service has already been stopped. No action is performed.</string>
     <string name="service_status_dialog_started">The service has already been started. No action is performed. </string>
-    <string name="configuration_sample_frequency">Sample frequency</string>
-    <string name="configuration_sample_frequency_fastest">Fastest</string>
-    <string name="configuration_sample_frequency_notsofast">Not so fast</string>
+    <string name="configuration_sampling_interval">Sampling Interval</string>
+    <string name="configuration_sampling_interval_fastest">Fastest</string>
+    <string name="configuration_sampling_interval_notsofast">Not so fast</string>
+    <string name="configuration_logging_behavior">Logging behavior</string>
+    <string name="configuration_logging_behavior_alwaysOn">Always on</string>
+    <string name="configuration_logging_behavior_screenOn">When screen is on</string>
+    <string name="configuration_preprocessing">Preprocessing</string>
+    <string name="configuration_preprocessing_none">None (raw data)</string>
+    <string name="configuration_preprocessing_variance">Variance analysis</string>
     <string name="configuration_restart_approval_title">Restart recording?</string>
     <string name="configuration_restart_approval_text">By applying this change the logging must be reset and a new recording must be started. Do you want to start a new recording now or restart the logging later manually?</string>
     <string name="configuration_restart_approval_now">Restart now</string>
@@ -33,4 +46,18 @@
     <string name="configuration_label">The preferences will be applied after restarting the logging service.</string>
     <string name="service_notification_title">Motion detection active</string>
     <string name="service_notification_text">Touch to end measurement.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="empty_session">Unnamed</string>
+    <string name="sec">sec</string>
+    <string name="action_export">Export</string>
+    <string name="action_delete">Delete</string>
+    <string name="sessions_export_error">Export failed.</string>
+    <string name="sessions_export_successful">Export successful.</string>
+    <string name="sessions_upload_successful">Upload successful.</string>
+    <string name="sessions_upload_error">Error while uploading session.</string>
+    <string name="permission_dialog_thanks">Thank you for granting permission. Try exporting again please.</string>
+    <string name="permission_dialog_not_granted">The data can only be exported with the permission to write to external storage. Please try again.</string>
+    <string name="delete_successful">Session(s) deleted.</string>
 </resources>

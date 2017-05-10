@@ -1,12 +1,16 @@
 package de.rwth_aachen.inets.gollum;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +24,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, ActivityCompat.OnRequestPermissionsResultCallback {
+
+    protected static final int PERMISSION_REQUEST_STORAGE = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +47,9 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        displayView(R.id.nav_service_status);
+        if(savedInstanceState == null) {
+            displayView(R.id.nav_service_status);
+        }
     }
 
     @Override
@@ -85,7 +93,9 @@ public class MainActivity extends AppCompatActivity
                 fragment = new ConfigurationFragment();
                 title = getResources().getString(R.string.nav_settings);
                 break;
-            case R.id.nav_stats:
+            case R.id.nav_sessions:
+                fragment = new SessionsFragment();
+                title = getString(R.string.nav_sessions);
                 break;
 
         }
@@ -117,5 +127,38 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    new AlertDialog.Builder(this)
+                            .setMessage(getString(R.string.permission_dialog_thanks))
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) { }
+                            })
+                            .show();
+
+                } else {
+
+                    new AlertDialog.Builder(this)
+                            .setMessage(getString(R.string.permission_dialog_not_granted))
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) { }
+                            })
+                            .show();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:gravity="center_vertical"
+    android:padding="2dip">
+    <CheckBox
+        android:id="@+id/sessions_list_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:clickable="false"/>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:paddingTop="2dip"
+        android:paddingBottom="2dip"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="?android:attr/activatedBackgroundIndicator"
+        android:mode="twoLine">
+        <TextView android:id="@+id/list_text1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="?android:attr/listPreferredItemPaddingStart"
+            android:layout_marginTop="6dip" android:text="asdfdsa"
+            android:textAppearance="?android:attr/textAppearanceListItem" />
+        <TextView android:id="@+id/list_text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="asdfew"
+            android:layout_marginStart="?android:attr/listPreferredItemPaddingStart"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,7 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="sampleFrequencies">
-        <item>@string/configuration_sample_frequency_fastest</item>
-        <item>@string/configuration_sample_frequency_notsofast</item>
+    <string-array name="sampling_interval_entries">
+        <item>@string/configuration_sampling_interval_fastest</item>
+        <item>@string/configuration_sampling_interval_25ms</item>
+        <item>@string/configuration_sampling_interval_50ms</item>
+        <item>@string/configuration_sampling_interval_100ms</item>
     </string-array>
+    <string-array name="sampling_interval_values">
+        <item>fastest</item>
+        <item>25ms</item>
+        <item>50ms</item>
+        <item>100ms</item>
+    </string-array>
+    <string name="configuration_sampling_interval_default">fastest</string>
+
+    <string-array name="logging_behavior_entries">
+        <item>@string/configuration_logging_behavior_alwaysOn</item>
+        <item>@string/configuration_logging_behavior_screenOn</item>
+    </string-array>
+    <string-array name="logging_behavior_values">
+        <item>alwaysOn</item>
+        <item>screenOn</item>
+    </string-array>
+    <string name="configuration_logging_behavior_default">alwaysOn</string>
+
+    <string-array name="preprocessing_entries">
+        <item>@string/configuration_preprocessing_none</item>
+    </string-array>
+    <string-array name="preprocessing_values">
+        <item>none</item>
+        <item>variance</item>
+    </string-array>
+    <string name="configuration_preprocessing_default">none</string>
+    <string name="configuration_sampling_interval_25ms">25 ms</string>
+    <string name="configuration_sampling_interval_50ms">50 ms</string>
+    <string name="configuration_sampling_interval_100ms">100 ms</string>
+
 </resources>

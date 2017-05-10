@@ -3,49 +3,108 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
+    android:padding="16dp"
     tools:context="de.rwth_aachen.inets.gollum.ServiceStatusFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:gravity="center"
-        android:layout_gravity="center_vertical">
+        android:orientation="vertical">
 
         <TextView
+            android:id="@+id/textView_service_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
             android:text="@string/service_status_checking"
-            android:id="@+id/textView_service_status"
-            android:textSize="20sp"
-            android:paddingBottom="10dp"/>
+            android:textSize="20sp" />
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/service_status_label_sessionname"/>
+                android:text="@string/service_status_label_sessionname" />
 
             <EditText
+                android:id="@+id/editText_sessionname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
                 android:ems="10"
-                android:id="@+id/editText_sessionname"
-                android:hint="@string/service_status_sessionname_hint" />
+                android:hint="@string/service_status_sessionname_hint"
+                android:inputType="text" />
         </LinearLayout>
 
         <Button
-            android:text="@string/service_status_start"
+            android:id="@+id/service_status_startstopbutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/service_status_startstopbutton" />
+            android:text="@string/service_status_start" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="40dp" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:text="TRAINING MODE"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User name:" />
+
+            <EditText
+                android:id="@+id/editText_trainingmode_username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_trainingmode_right_pocket"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="In right pocket" />
+
+        <Button
+            android:id="@+id/button_trainingmode_right_hand"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="In right hand" />
+
+        <Button
+            android:id="@+id/button_trainingmode_right_ear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="At right ear" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/sensors_not_present"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Required sensors unavailable.\nApp cannot be used on this phone!"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
 </FrameLayout>
