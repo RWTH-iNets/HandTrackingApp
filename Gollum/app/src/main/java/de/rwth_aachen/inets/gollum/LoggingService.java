@@ -24,6 +24,11 @@ public class LoggingService extends Service implements SensorEventListener
     private Sensor mRotationVectorSensor;
     private Sensor mGyroscopeSensor;
     private Sensor mAccelerometerSensor;
+    private Sensor mMagnetometerSensor;
+    private Sensor mProximitySensor;
+    private Sensor mLightSensor;
+    private Sensor mPressureSensor;
+    private Sensor mAmbientTemperatureSensor;
     private LoggingServiceConfiguration mConfiguration;
     private long mCurrentLogSessionID;
 
@@ -35,7 +40,12 @@ public class LoggingService extends Service implements SensorEventListener
         SCREEN_ON_OFF(3),
         GAME_ROTATION_VECTOR(4),
         GYROSCOPE(5),
-        ACCELEROMETER(6);
+        ACCELEROMETER(6),
+        MAGNETOMETER(7),
+        PROXIMITY(8),
+        LIGHT(9),
+        PRESSURE(10),
+        AMBIENT_TEMPERATURE(11);
 
         private final int value;
 
@@ -132,6 +142,11 @@ public class LoggingService extends Service implements SensorEventListener
 
         mGyroscopeSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mMagnetometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        mPressureSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+        mAmbientTemperatureSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
 
         // Initialize log session
         mCurrentLogSessionID = getDBHelper().insertLogSession(mConfiguration);
@@ -168,20 +183,61 @@ public class LoggingService extends Service implements SensorEventListener
 
     private void startLoggingSensors()
     {
-        if(mRotationVectorSensor != null)
+        if(mRotationVectorSensor != null) {
+            Log.i("SENSOR", "Using RotationVector sensor [" + mRotationVectorSensor.getName() + "]");
             mSensorManager.registerListener(this, mRotationVectorSensor, mConfiguration.SamplingInterval);
-        else
+        } else {
             Log.e("SENSOR", "No RotationVector sensor available!");
+        }
 
-        if(mGyroscopeSensor != null)
+        if(mGyroscopeSensor != null) {
+            Log.i("SENSOR", "Using Gyroscope sensor [" + mGyroscopeSensor.getName() + "]");
             mSensorManager.registerListener(this, mGyroscopeSensor, mConfiguration.SamplingInterval);
-        else
+        } else {
             Log.e("SENSOR", "No Gyroscope sensor available!");
+        }
 
-        if(mAccelerometerSensor != null)
+        if(mAccelerometerSensor != null) {
+            Log.i("SENSOR", "Using Accelerometer sensor [" + mAccelerometerSensor.getName() + "]");
             mSensorManager.registerListener(this, mAccelerometerSensor, mConfiguration.SamplingInterval);
-        else
+        } else {
             Log.e("SENSOR", "No Accelerometer sensor available!");
+        }
+
+        if(mMagnetometerSensor != null) {
+            Log.i("SENSOR", "Using Magnetometer sensor [" + mMagnetometerSensor.getName() + "]");
+            mSensorManager.registerListener(this, mMagnetometerSensor, mConfiguration.SamplingInterval);
+        } else {
+            Log.e("SENSOR", "No Magnetometer sensor available!");
+        }
+
+        if(mProximitySensor != null) {
+            Log.i("SENSOR", "Using Proximity sensor [" + mProximitySensor.getName() + "]");
+            mSensorManager.registerListener(this, mProximitySensor, mConfiguration.SamplingInterval);
+        } else {
+            Log.e("SENSOR", "No Proximity sensor available!");
+        }
+
+        if(mLightSensor != null) {
+            Log.i("SENSOR", "Using Light sensor [" + mLightSensor.getName() + "]");
+            mSensorManager.registerListener(this, mLightSensor, mConfiguration.SamplingInterval);
+        } else {
+            Log.e("SENSOR", "No Light sensor available!");
+        }
+
+        if(mPressureSensor != null) {
+            Log.i("SENSOR", "Using Pressure sensor [" + mPressureSensor.getName() + "]");
+            mSensorManager.registerListener(this, mPressureSensor, mConfiguration.SamplingInterval);
+        } else {
+            Log.e("SENSOR", "No Pressure sensor available!");
+        }
+
+        if(mAmbientTemperatureSensor != null) {
+            Log.i("SENSOR", "Using Ambient Temperature sensor [" + mAmbientTemperatureSensor.getName() + "]");
+            mSensorManager.registerListener(this, mAmbientTemperatureSensor, mConfiguration.SamplingInterval);
+        } else {
+            Log.e("SENSOR", "No Ambient Temperature sensor available!");
+        }
     }
 
     private void stopLoggingSensors()
@@ -211,6 +267,26 @@ public class LoggingService extends Service implements SensorEventListener
             case Sensor.TYPE_ACCELEROMETER:
                 log_event_type = LogEventTypes.ACCELEROMETER;
                 num_values = 3;
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                log_event_type = LogEventTypes.MAGNETOMETER;
+                num_values = 3;
+                break;
+            case Sensor.TYPE_PROXIMITY:
+                log_event_type = LogEventTypes.PROXIMITY;
+                num_values = 1;
+                break;
+            case Sensor.TYPE_LIGHT:
+                log_event_type = LogEventTypes.LIGHT;
+                num_values = 1;
+                break;
+            case Sensor.TYPE_PRESSURE:
+                log_event_type = LogEventTypes.PRESSURE;
+                num_values = 1;
+                break;
+            case Sensor.TYPE_AMBIENT_TEMPERATURE:
+                log_event_type = LogEventTypes.AMBIENT_TEMPERATURE;
+                num_values = 1;
                 break;
             default:
                 throw new RuntimeException("Invalid Sensor Type!");

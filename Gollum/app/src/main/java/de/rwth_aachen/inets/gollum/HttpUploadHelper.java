@@ -61,13 +61,10 @@ public class HttpUploadHelper {
                 String session_id = "";
 
                 while(json.hasNext()) {
-                    String name = json.nextName();
-                    if (name.equals("status")) {
-                        status = json.nextString();
-                    } else if (name.equals("upload_session_id")) {
-                        session_id = json.nextString();
-                    } else {
-                        json.skipValue();
+                    switch(json.nextName()) {
+                        case "status": status = json.nextString(); break;
+                        case "upload_session_id": session_id = json.nextString(); break;
+                        default: json.skipValue(); break;
                     }
                 }
 
@@ -269,13 +266,10 @@ public class HttpUploadHelper {
                     String my_user_id = "";
 
                     while(json.hasNext()) {
-                        String name = json.nextName();
-                        if (name.equals("status")) {
-                            status = json.nextString();
-                        } else if (name.equals("user_id")) {
-                            my_user_id = json.nextString();
-                        } else {
-                            json.skipValue();
+                        switch(json.nextName()) {
+                            case "status": status = json.nextString(); break;
+                            case "user_id": my_user_id = json.nextString(); break;
+                            default: json.skipValue(); break;
                         }
                     }
 
