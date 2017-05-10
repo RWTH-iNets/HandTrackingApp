@@ -46,3 +46,34 @@ class AccelerometerEvent(LogEventBase):
     def __init__(self, session_time, x, y, z):
         super().__init__(session_time)
         self.vector = Vector3(x, y, z)
+
+
+class MagnetometerEvent(LogEventBase):
+    def __init__(self, session_time, x, y, z):
+        super().__init__(session_time)
+        self.vector = Vector3(x, y, z)
+
+
+class ProximitySensorEvent(LogEventBase):
+    def __init__(self, session_time, distance):
+        super().__init__(session_time)
+        self.distance = distance;
+
+
+class LightSensorEvent(LogEventBase):
+    def __init__(self, session_time, brightness):
+        super().__init__(session_time)
+        self.brightness = brightness;
+
+
+class PressureSensorEvent(LogEventBase):
+    def __init__(self, session_time, pressure):
+        super().__init__(session_time)
+        self.pressure = pressure;
+
+
+class AmbientTemperatureSensorEvent(LogEventBase):
+    def __init__(self, session_time, temperature):
+        super().__init__(session_time)
+        self.temperature = temperature;
+

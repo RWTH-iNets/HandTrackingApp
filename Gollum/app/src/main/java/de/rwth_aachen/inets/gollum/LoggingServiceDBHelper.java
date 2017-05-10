@@ -329,6 +329,31 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.value(cursor.getFloat(data_float_2_idx));
                             Writer.endArray();
                             break;
+                        case MAGNETOMETER:
+                            Writer.name("type").value("MAGNETOMETER");
+                            Writer.name("vector");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.endArray();
+                            break;
+                        case PROXIMITY:
+                            Writer.name("type").value("PROXIMITY");
+                            Writer.name("value").value(cursor.getFloat(data_float_0_idx));
+                            break;
+                        case LIGHT:
+                            Writer.name("type").value("LIGHT");
+                            Writer.name("value").value(cursor.getFloat(data_float_0_idx));
+                            break;
+                        case PRESSURE:
+                            Writer.name("type").value("PRESSURE");
+                            Writer.name("value").value(cursor.getFloat(data_float_0_idx));
+                            break;
+                        case AMBIENT_TEMPERATURE:
+                            Writer.name("type").value("AMBIENT_TEMPERATURE");
+                            Writer.name("value").value(cursor.getFloat(data_float_0_idx));
+                            break;
                     }
                     Writer.endObject();
                     i++;
@@ -501,6 +526,31 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.value(cursor.getFloat(data_float_1_idx));
                             Writer.value(cursor.getFloat(data_float_2_idx));
                             Writer.endArray();
+                            break;
+                        case MAGNETOMETER:
+                            Writer.name("type").value("MAGNETOMETER");
+                            Writer.name("vector");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.endArray();
+                            break;
+                        case PROXIMITY:
+                            Writer.name("type").value("PROXIMITY");
+                            Writer.name("value").value(cursor.getFloat(data_float_0_idx));
+                            break;
+                        case LIGHT:
+                            Writer.name("type").value("LIGHT");
+                            Writer.name("value").value(cursor.getFloat(data_float_0_idx));
+                            break;
+                        case PRESSURE:
+                            Writer.name("type").value("PRESSURE");
+                            Writer.name("value").value(cursor.getFloat(data_float_0_idx));
+                            break;
+                        case AMBIENT_TEMPERATURE:
+                            Writer.name("type").value("AMBIENT_TEMPERATURE");
+                            Writer.name("value").value(cursor.getFloat(data_float_0_idx));
                             break;
                     }
                     Writer.endObject();
