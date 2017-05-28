@@ -5,13 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Base64;
+import android.database.sqlite.SQLiteStatement;
 import android.util.JsonWriter;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 
@@ -25,11 +24,14 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
     private static LoggingServiceDBHelper sSingletonInstance = null;
     private Context context;
 
-    public static LoggingServiceDBHelper getInstance(Context ctx)
+    public static synchronized LoggingServiceDBHelper getInstance(Context ctx)
     {
+        // Use the application context, which will ensure that you
+        // don't accidentally leak an Activity's context.
+        // See this article for more information: https://android-developers.googleblog.com/2009/01/avoiding-memory-leaks.html
         if(sSingletonInstance == null)
         {
-            sSingletonInstance = new LoggingServiceDBHelper(ctx);
+            sSingletonInstance = new LoggingServiceDBHelper(ctx.getApplicationContext());
         }
 
         return sSingletonInstance;
@@ -96,7 +98,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("session_id", session_id);
-        values.put("statsu", status);
+        values.put("status", status);
         db.insert("sync", null, values);
     }
 
@@ -165,14 +167,18 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
 
     public String getUserId()
     {
+        String res = "";
+
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.rawQuery("SELECT server_user_id FROM user", null);
         if(c.getCount() > 0) {
             c.moveToFirst();
             int col = c.getColumnIndex("server_user_id");
-            return c.getString(col);
+            res = c.getString(col);
         }
-        return "";
+        c.close();
+
+        return res;
     }
 
     public void addUserId(String server_user_id)
@@ -197,7 +203,10 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         Cursor c = db.rawQuery("SELECT COUNT(*) FROM log_sessions", null);
 
         c.moveToFirst();
-        return c.getInt(0);
+        int res = c.getInt(0);
+        c.close();
+
+        return res;
     }
 
     public String exportSessionToJSON(long SessionID) throws IOException
@@ -564,38 +573,60 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         Writer.endObject();
     }
 
-    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type)
+    private SQLiteStatement mInsertStatement = null;
+    private long mNumRowsInInsertStatement = 0;
+
+    private void flushInsertStatement()
     {
         SQLiteDatabase db = getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("session_id", SessionID);
-        values.put("session_time", SessionTime);
-        values.put("type", Type.getValue());
-        db.insert("log_entries", null, values);
+
+        if(mInsertStatement != null)
+        {
+            db.setTransactionSuccessful();
+            db.endTransaction();
+        }
+
+        db.beginTransaction();
+        mInsertStatement = db.compileStatement("INSERT INTO `log_entries` (session_id, session_time, type, data_int_0, data_float_0, data_float_1, data_float_2, data_float_3) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        mNumRowsInInsertStatement = 0;
+    }
+
+    private void addLogEntryToInsertStatement(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, int DataInt0, float DataFloat0, float DataFloat1, float DataFloat2, float DataFloat3)
+    {
+        if(mInsertStatement == null)
+        {
+            flushInsertStatement();
+        }
+
+        mInsertStatement.bindLong(1, SessionID);
+        mInsertStatement.bindLong(2, SessionTime);
+        mInsertStatement.bindLong(3, Type.getValue());
+        mInsertStatement.bindLong(4, DataInt0);
+        mInsertStatement.bindDouble(5, DataFloat0);
+        mInsertStatement.bindDouble(6, DataFloat1);
+        mInsertStatement.bindDouble(7, DataFloat2);
+        mInsertStatement.bindDouble(8, DataFloat3);
+        mInsertStatement.execute();
+
+        ++mNumRowsInInsertStatement;
+        if(Type == LoggingService.LogEventTypes.LOG_STOPPED || mNumRowsInInsertStatement > 500)
+        {
+            flushInsertStatement();
+        }
+    }
+
+    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type)
+    {
+        addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, 0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, int Data0)
     {
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("session_id", SessionID);
-        values.put("session_time", SessionTime);
-        values.put("type", Type.getValue());
-        values.put("data_int_0", Data0);
-        db.insert("log_entries", null, values);
+        addLogEntryToInsertStatement(SessionID, SessionTime, Type, Data0, 0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, float Data0, float Data1, float Data2, float Data3)
     {
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("session_id", SessionID);
-        values.put("session_time", SessionTime);
-        values.put("type", Type.getValue());
-        values.put("data_float_0", Data0);
-        values.put("data_float_1", Data1);
-        values.put("data_float_2", Data2);
-        values.put("data_float_3", Data3);
-        db.insert("log_entries", null, values);
+        addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, Data0, Data1, Data2, Data3);
     }
 }
