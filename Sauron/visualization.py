@@ -104,7 +104,7 @@ class Simulation:
 
     def get_current_model_transform(self, simulation_time):
         simulation_time = simulation_time % self.log_session.events[-1].session_time
-        return self.log_session.events[self.log_session.get_nearest_event_index(simulation_time, RotationVectorEvent)].quaternion
+        return self.log_session.events[self.log_session.events.get_nearest_index(simulation_time, RotationVectorEvent)].quaternion
 
 
 if __name__ == "__main__":

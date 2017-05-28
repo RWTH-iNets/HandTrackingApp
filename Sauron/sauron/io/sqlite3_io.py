@@ -26,7 +26,20 @@ class SQLiteDatabase:
         
         if rows:
             session = self._logsession_from_db(session_id, *rows.fetchone())
-            session.events = self.get_all_events(session.session_id)
+            session.events.events = self.get_all_events(session.session_id)
+
+            # Validate session
+            if not isinstance(session.events[0], LogStartedEvent) or not isinstance(session.events[-1], LogStoppedEvent):
+                raise ValueError('First/last event in session must be LogStarted and LogStopped, respectively!')
+
+            # Adjust session_time
+            # TODO: This is a dirty hack to circumvent the mess with android event timestamps. Find a better solution for this!
+            session_duration = session.events[-1].session_time - session.events[0].session_time
+            start_session_time = session.events[1].session_time
+            for event in session.events:
+                event.session_time = event.session_time - start_session_time
+            session.events[0].session_time = 0
+            session.events[-1].session_time = session_duration
         else:
             session = None
 
@@ -53,7 +66,7 @@ class SQLiteDatabase:
 
         return handler_map[event_type]()
 
-    def get_all_events(self, session_id):
+    def _get_all_events(self, session_id):
         rows = self.cursor.execute('SELECT type, session_time, data_int_0, data_float_0, data_float_1, data_float_2, data_float_3 FROM log_entries WHERE session_id={} ORDER BY session_time ASC'.format(session_id))
         
         return [self._logevent_from_db(*row) for row in rows]
