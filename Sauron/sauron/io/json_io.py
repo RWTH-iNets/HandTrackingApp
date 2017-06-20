@@ -15,7 +15,21 @@ class JSONDatabase:
     @staticmethod
     def _logsession_from_json(session_data):
         session = LogSession(int(session_data['id']), session_data['description'], session_data['start_time'], session_data['sampling_behavior'], session_data['sampling_interval'] / 1000)
-        session.events = [JSONDatabase._logevent_from_json(event_data) for event_data in session_data['events']]
+        session.events.events = [JSONDatabase._logevent_from_json(event_data) for event_data in session_data['events']]
+
+        # Validate session
+        if not isinstance(session.events[0], LogStartedEvent) or not isinstance(session.events[-1], LogStoppedEvent):
+            raise ValueError('First/last event in session must be LogStarted and LogStopped, respectively!')
+
+        # Adjust session_time
+        # TODO: This is a dirty hack to circumvent the mess with android event timestamps. Find a better solution for this!
+        session_duration = session.events[-1].session_time - session.events[0].session_time
+        start_session_time = session.events[1].session_time
+        for event in session.events:
+            event.session_time = event.session_time - start_session_time
+        session.events[0].session_time = 0
+        session.events[-1].session_time = session_duration
+
         return session
 
     @staticmethod
@@ -45,7 +59,3 @@ class JSONDatabase:
 
     def get_session(self, session_id):
         return self.sessions[session_id] if session_id in self.sessions else None
-
-    def get_all_events(self, session_id):
-        session = get_session(session_id)
-        return session.events if session is not None else None

@@ -20,10 +20,10 @@ for session_id in db.get_all_session_ids():
     angular_velocity_y = []
     angular_velocity_z = []
 
-    idx = session.get_nearest_event_index(0, RotationVectorEvent)
+    idx = session.events.get_nearest_index(0, RotationVectorEvent)
     while idx is not None:
-        prev_idx = session.get_previous_event_index(idx, RotationVectorEvent)
-        next_idx = session.get_next_event_index(idx, RotationVectorEvent)
+        prev_idx = session.events.get_previous_index(idx, RotationVectorEvent)
+        next_idx = session.events.get_next_index(idx, RotationVectorEvent)
 
         if idx is not None and prev_idx is not None and next_idx is not None:
             q = session.events[idx].quaternion

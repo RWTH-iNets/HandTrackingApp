@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>3b376784-fa4a-4a78-856e-7c0109fe4d6c</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>visualization.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -36,6 +36,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="sauron\logevent.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="sauron\logeventlist.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="sauron\logsession.py">
