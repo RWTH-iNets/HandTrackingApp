@@ -10,6 +10,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.database.DatabaseUtilsCompat;
 import android.support.v7.app.AlertDialog;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -55,6 +57,8 @@ public class ServiceStatusFragment extends Fragment {
     Button startStopButton;
     EditText trainingModeUsername;
     ArrayList<Button> trainingModeButtons;
+    RadioButton trainingModeType_StandingStill;
+    RadioButton trainingModeType_Walking;
 
     private boolean isServiceRunning = false;
     private String currentSessionName = "";
@@ -98,56 +102,18 @@ public class ServiceStatusFragment extends Fragment {
                 }
             });
 
+            trainingModeType_StandingStill = (RadioButton) v.findViewById(R.id.radioButton_trainingmode_standing);
+            trainingModeType_Walking = (RadioButton) v.findViewById(R.id.radioButton_trainingmode_walking);
+
             trainingModeUsername = (EditText) v.findViewById(R.id.editText_trainingmode_username);
-
             trainingModeButtons = new ArrayList<>();
-            Button trainingRightPocket = (Button) v.findViewById(R.id.button_trainingmode_right_pocket);
-            trainingModeButtons.add(trainingRightPocket);
-            trainingRightPocket.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(trainingModeUsername.getText().length() <= 0) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        builder.setMessage("Please enter a username!")
-                                .setPositiveButton(R.string.ok, null)
-                                .show();
-                    } else {
-                        startService("training_" + trainingModeUsername.getText() + "_rightpocket");
-                    }
-                }
-            });
-
-            Button trainingRightHand = (Button) v.findViewById(R.id.button_trainingmode_right_hand);
-            trainingModeButtons.add(trainingRightHand);
-            trainingRightHand.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(trainingModeUsername.getText().length() <= 0) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        builder.setMessage("Please enter a username!")
-                                .setPositiveButton(R.string.ok, null)
-                                .show();
-                    } else {
-                        startService("training_" + trainingModeUsername.getText() + "_righthand");
-                    }
-                }
-            });
-
-            Button trainingRightEar = (Button) v.findViewById(R.id.button_trainingmode_right_ear);
-            trainingModeButtons.add(trainingRightEar);
-            trainingRightEar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(trainingModeUsername.getText().length() <= 0) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        builder.setMessage("Please enter a username!")
-                                .setPositiveButton(R.string.ok, null)
-                                .show();
-                    } else {
-                        startService("training_" + trainingModeUsername.getText() + "_rightear");
-                    }
-                }
-            });
+            registerTrainingModeButton(v, R.id.button_trainingmode_both_hands_landscape, "bothhandslandscape");
+            registerTrainingModeButton(v, R.id.button_trainingmode_left_pocket, "leftpocket");
+            registerTrainingModeButton(v, R.id.button_trainingmode_left_hand, "lefthand");
+            registerTrainingModeButton(v, R.id.button_trainingmode_left_ear, "leftear");
+            registerTrainingModeButton(v, R.id.button_trainingmode_right_pocket, "rightpocket");
+            registerTrainingModeButton(v, R.id.button_trainingmode_right_hand, "righthand");
+            registerTrainingModeButton(v, R.id.button_trainingmode_right_ear, "rightear");
 
             changeUIStatus(checkIsServiceRunning());
         } else {
@@ -156,6 +122,26 @@ public class ServiceStatusFragment extends Fragment {
         }
 
         return v;
+    }
+
+    public void registerTrainingModeButton(View v, @IdRes int id, final String session_postfix)
+    {
+        Button btn = (Button) v.findViewById(id);
+        trainingModeButtons.add(btn);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(trainingModeUsername.getText().length() <= 0) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setMessage("Please enter a username!")
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
+                } else {
+                    String type_string = trainingModeType_StandingStill.isChecked() ? "standing" : "walking";
+                    startService("training_" + trainingModeUsername.getText() + "_" + type_string + "_" + session_postfix);
+                }
+            }
+        });
     }
 
     @Override

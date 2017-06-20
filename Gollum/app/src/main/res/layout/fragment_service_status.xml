@@ -51,7 +51,7 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="40dp" />
+            android:layout_height="20dp" />
 
         <TextView
             android:id="@+id/textView4"
@@ -77,25 +77,100 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="text" />
+
         </LinearLayout>
 
-        <Button
-            android:id="@+id/button_trainingmode_right_pocket"
+        <RadioGroup
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="In right pocket" />
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:checkedButton="@+id/radioButton_trainingmode_standing">
+
+            <RadioButton
+                android:id="@+id/radioButton_trainingmode_standing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Standing still" />
+
+            <RadioButton
+                android:id="@+id/radioButton_trainingmode_walking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Walking" />
+        </RadioGroup>
 
         <Button
-            android:id="@+id/button_trainingmode_right_hand"
+            android:id="@+id/button_trainingmode_both_hands_landscape"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="In right hand" />
+            android:layout_weight="1"
+            android:text="In both hands (landscape)" />
 
-        <Button
-            android:id="@+id/button_trainingmode_right_ear"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="At right ear" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_trainingmode_left_hand"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="In left hand" />
+
+            <Button
+                android:id="@+id/button_trainingmode_right_hand"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="In right hand" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_trainingmode_left_pocket"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="In left pocket" />
+
+            <Button
+                android:id="@+id/button_trainingmode_right_pocket"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="In right pocket" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_trainingmode_left_ear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="At left ear" />
+
+            <Button
+                android:id="@+id/button_trainingmode_right_ear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="At right ear" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <TextView
