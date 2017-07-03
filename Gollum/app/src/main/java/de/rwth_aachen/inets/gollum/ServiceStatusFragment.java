@@ -8,8 +8,11 @@ import android.content.SharedPreferences;
 import android.database.DatabaseUtils;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.database.DatabaseUtilsCompat;
@@ -138,7 +141,7 @@ public class ServiceStatusFragment extends Fragment {
                             .show();
                 } else {
                     String type_string = trainingModeType_StandingStill.isChecked() ? "standing" : "walking";
-                    startService("training_" + trainingModeUsername.getText() + "_" + type_string + "_" + session_postfix);
+                    startService("training_" + trainingModeUsername.getText() + "_" + type_string + "_" + session_postfix, 5000, 60000);
                 }
             }
         });
@@ -186,7 +189,45 @@ public class ServiceStatusFragment extends Fragment {
         return game_sensor_found;
     }
 
-    private void startService(String sessionName)
+    private void startService(final String NewSessionName, long delayMillis, long timeoutMillis)
+    {
+        sessionName.setText("Service starting in " + Long.toString(delayMillis) + "ms!");
+        setInputEnabled(false);
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startService(NewSessionName);
+
+                try {
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    Ringtone r = RingtoneManager.getRingtone(getContext(), notification);
+                    r.play();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, delayMillis);
+
+        final Handler handler2 = new Handler();
+        handler2.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                stopService();
+
+                try {
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    Ringtone r = RingtoneManager.getRingtone(getContext(), notification);
+                    r.play();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, delayMillis + timeoutMillis);
+    }
+
+    private void startService(String NewSessionName)
     {
         if(checkIsServiceRunning() != isServiceRunning)
         {
@@ -201,14 +242,14 @@ public class ServiceStatusFragment extends Fragment {
         else
         {
             LoggingServiceConfiguration config = new LoggingServiceConfiguration(PreferenceManager.getDefaultSharedPreferences(getActivity()));
-            config.SessionName = sessionName;
+            config.SessionName = NewSessionName;
 
             Intent intent = new Intent(getActivity().getApplicationContext(), LoggingService.class);
             intent.putExtra(LoggingService.CONFIGURATION_TAG, config);
 
             getActivity().startService(intent);
 
-            currentSessionName = sessionName;
+            currentSessionName = NewSessionName;
             changeUIStatus(true);
         }
     }
@@ -238,23 +279,24 @@ public class ServiceStatusFragment extends Fragment {
         {
             startStopButton.setText(R.string.service_status_stop);
             serviceStatus.setText(R.string.service_status_service_running);
-            sessionName.setEnabled(false);
             sessionName.setText(currentSessionName);
-
-            trainingModeUsername.setEnabled(false);
-            for(Button btn:trainingModeButtons)
-                btn.setEnabled(false);
+            setInputEnabled(false);
         }
         else
         {
             startStopButton.setText(R.string.service_status_start);
             serviceStatus.setText(R.string.service_status_service_not_running);
-            sessionName.setEnabled(true);
-
-            trainingModeUsername.setEnabled(true);
-            for(Button btn:trainingModeButtons)
-                btn.setEnabled(true);
+            setInputEnabled(true);
         }
+    }
+
+    private void setInputEnabled(boolean enabled)
+    {
+        sessionName.setEnabled(enabled);
+
+        trainingModeUsername.setEnabled(enabled);
+        for(Button btn:trainingModeButtons)
+            btn.setEnabled(enabled);
     }
 
     private boolean checkIsServiceRunning()
