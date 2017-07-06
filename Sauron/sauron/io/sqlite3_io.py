@@ -1,6 +1,6 @@
 import sqlite3
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent
 from ..logsession import LogSession
 
 
@@ -34,12 +34,13 @@ class SQLiteDatabase:
 
             # Adjust session_time
             # TODO: This is a dirty hack to circumvent the mess with android event timestamps. Find a better solution for this!
-            session_duration = session.events[-1].session_time - session.events[0].session_time
-            start_session_time = session.events[1].session_time
+            start_session_time_clock = session.events[0].session_time
+            start_session_time_sensor = session.events[1].session_time
             for event in session.events:
-                event.session_time = event.session_time - start_session_time
-            session.events[0].session_time = 0
-            session.events[-1].session_time = session_duration
+                if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent):
+                    event.session_time = event.session_time - start_session_time_clock
+                else:
+                    event.session_time = event.session_time - start_session_time_sensor
         else:
             session = None
 
@@ -62,6 +63,7 @@ class SQLiteDatabase:
             9: lambda: LightSensorEvent(session_time, data_float_0),
             10: lambda: PressureSensorEvent(session_time, data_float_0 * 100), # pressure stored as hPa
             11: lambda: AmbientTemperatureSensorEvent(session_time, data_float_0),
+            12: lambda: TrafficStatsEvent(session_time, data_float_0, data_float_1, data_float_2, data_float_3),
         }
 
         return handler_map[event_type]()

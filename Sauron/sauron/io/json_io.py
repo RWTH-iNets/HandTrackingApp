@@ -23,12 +23,13 @@ class JSONDatabase:
 
         # Adjust session_time
         # TODO: This is a dirty hack to circumvent the mess with android event timestamps. Find a better solution for this!
-        session_duration = session.events[-1].session_time - session.events[0].session_time
-        start_session_time = session.events[1].session_time
+        start_session_time_clock = session.events[0].session_time
+        start_session_time_sensor = session.events[1].session_time
         for event in session.events:
-            event.session_time = event.session_time - start_session_time
-        session.events[0].session_time = 0
-        session.events[-1].session_time = session_duration
+            if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent):
+                event.session_time = event.session_time - start_session_time_clock
+            else:
+                event.session_time = event.session_time - start_session_time_sensor
 
         return session
 
@@ -49,6 +50,7 @@ class JSONDatabase:
             'LIGHT': lambda: LightSensorEvent(session_time, event_data['value']),
             'PRESSURE': lambda: PressureSensorEvent(session_time, event_data['value'] * 100), # pressure stored as hPa
             'AMBIENT_TEMPERATURE': lambda: AmbientTemperatureSensorEvent(session_time, event_data['value']),
+            'TRAFFIC_STATS': lambda: TrafficStatsEvent(session_time, event_data['mobile_rx_bytes'], event_data['mobile_tx_bytes'], event_data['total_rx_bytes'], event_data['total_tx_bytes']),
         }
 
         return handler_map[event_data['type']]()
