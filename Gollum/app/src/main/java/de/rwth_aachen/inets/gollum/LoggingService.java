@@ -10,6 +10,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.TrafficStats;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v7.app.NotificationCompat;
@@ -30,6 +32,7 @@ public class LoggingService extends Service implements SensorEventListener
     private Sensor mLightSensor;
     private Sensor mPressureSensor;
     private Sensor mAmbientTemperatureSensor;
+    private Handler mTaskHandler = new Handler();
     private LoggingServiceConfiguration mConfiguration;
     private long mCurrentLogSessionID;
 
@@ -46,7 +49,8 @@ public class LoggingService extends Service implements SensorEventListener
         PROXIMITY(8),
         LIGHT(9),
         PRESSURE(10),
-        AMBIENT_TEMPERATURE(11);
+        AMBIENT_TEMPERATURE(11),
+        TRAFFIC_STATS(12);
 
         private final int value;
 
@@ -86,7 +90,7 @@ public class LoggingService extends Service implements SensorEventListener
             switch(intent.getAction())
             {
                 case Intent.ACTION_SCREEN_ON:
-                    getDBHelper().insertLogEntry(mCurrentLogSessionID, System.nanoTime(), LogEventTypes.SCREEN_ON_OFF, 1);
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.SCREEN_ON_OFF, 1);
 
                     if(mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON)
                     {
@@ -95,7 +99,7 @@ public class LoggingService extends Service implements SensorEventListener
                     break;
 
                 case Intent.ACTION_SCREEN_OFF:
-                    getDBHelper().insertLogEntry(mCurrentLogSessionID, System.nanoTime(), LogEventTypes.SCREEN_ON_OFF, 0);
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.SCREEN_ON_OFF, 0);
 
                     if(mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON)
                     {
@@ -110,6 +114,30 @@ public class LoggingService extends Service implements SensorEventListener
     {
 
     }
+
+    private long mLastMobileRx;
+    private long mLastMobileTx;
+    private long mLastTotalRx;
+    private long mLastTotalTx;
+
+    private Runnable mNetworkTrafficLogger = new Runnable() {
+        @Override
+        public void run() {
+            long CurMobileRx = TrafficStats.getMobileRxBytes();
+            long CurMobileTx = TrafficStats.getMobileTxBytes();
+            long CurTotalRx = TrafficStats.getTotalRxBytes();
+            long CurTotalTx = TrafficStats.getTotalTxBytes();
+
+            getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.TRAFFIC_STATS, (int)(CurMobileRx - mLastMobileRx), (int)(CurMobileTx - mLastMobileTx), (int)(CurTotalRx - mLastTotalRx), (int)(CurTotalTx - mLastTotalTx));
+
+            mLastMobileRx = CurMobileRx;
+            mLastMobileTx = CurMobileTx;
+            mLastTotalRx = CurTotalRx;
+            mLastTotalTx = CurTotalTx;
+
+            mTaskHandler.postDelayed(mNetworkTrafficLogger, 50);
+        }
+    };
 
     @Override
     public void onCreate()
@@ -157,6 +185,12 @@ public class LoggingService extends Service implements SensorEventListener
             //this needs to happen after session created
             startLoggingSensors();
 
+            mLastMobileRx = TrafficStats.getMobileRxBytes();
+            mLastMobileTx = TrafficStats.getMobileTxBytes();
+            mLastTotalRx = TrafficStats.getTotalRxBytes();
+            mLastTotalTx = TrafficStats.getTotalTxBytes();
+            mNetworkTrafficLogger.run();
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
             builder.setSmallIcon(R.drawable.ic_graphic_eq_black_24dp);
             builder.setContentTitle(getText(R.string.service_notification_title));
@@ -175,6 +209,7 @@ public class LoggingService extends Service implements SensorEventListener
     @Override
     public void onDestroy()
     {
+        mTaskHandler.removeCallbacks(mNetworkTrafficLogger);
         stopLoggingSensors();
         unregisterReceiver(mBroadcastReceiver);
 

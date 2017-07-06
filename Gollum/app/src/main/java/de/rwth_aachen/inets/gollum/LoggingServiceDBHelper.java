@@ -100,6 +100,8 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         values.put("session_id", session_id);
         values.put("status", status);
         db.insert("sync", null, values);
+
+        flushInsertStatement();
     }
 
     public void clearSessions()
@@ -127,6 +129,8 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                 "`sampling_behavior` INTEGER," +
                 "`sampling_interval` INTEGER" +
                 ")");
+
+        flushInsertStatement();
     }
 
     public Cursor getAllSessionData()
@@ -187,6 +191,8 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         ContentValues values = new ContentValues();
         values.put("server_user_id", server_user_id);
         db.insert("user", null, values);
+
+        flushInsertStatement();
     }
 
     public void deleteSession(long SessionID)
@@ -195,6 +201,8 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
 
         db.delete("log_sessions", "id = ?", new String[]{String.valueOf(SessionID)});
         db.delete("log_entries", "session_id = ?", new String[]{String.valueOf(SessionID)});
+
+        flushInsertStatement();
     }
 
     public int getNumSessions()
@@ -362,6 +370,13 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                         case AMBIENT_TEMPERATURE:
                             Writer.name("type").value("AMBIENT_TEMPERATURE");
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
+                            break;
+                        case TRAFFIC_STATS:
+                            Writer.name("type").value("TRAFFIC_STATS");
+                            Writer.name("mobile_rx_bytes").value(cursor.getFloat(data_float_0_idx));
+                            Writer.name("mobile_tx_bytes").value(cursor.getFloat(data_float_1_idx));
+                            Writer.name("total_rx_bytes").value(cursor.getFloat(data_float_2_idx));
+                            Writer.name("total_tx_bytes").value(cursor.getFloat(data_float_3_idx));
                             break;
                     }
                     Writer.endObject();
@@ -560,6 +575,13 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                         case AMBIENT_TEMPERATURE:
                             Writer.name("type").value("AMBIENT_TEMPERATURE");
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
+                            break;
+                        case TRAFFIC_STATS:
+                            Writer.name("type").value("TRAFFIC_STATS");
+                            Writer.name("mobile_rx_bytes").value(cursor.getFloat(data_float_0_idx));
+                            Writer.name("mobile_tx_bytes").value(cursor.getFloat(data_float_1_idx));
+                            Writer.name("total_rx_bytes").value(cursor.getFloat(data_float_2_idx));
+                            Writer.name("total_tx_bytes").value(cursor.getFloat(data_float_3_idx));
                             break;
                     }
                     Writer.endObject();
