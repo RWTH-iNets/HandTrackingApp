@@ -1,6 +1,6 @@
 import sqlite3
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent, PhoneCallEvent
 from ..logsession import LogSession
 
 
@@ -37,7 +37,7 @@ class SQLiteDatabase:
             start_session_time_clock = session.events[0].session_time
             start_session_time_sensor = session.events[1].session_time
             for event in session.events:
-                if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent):
+                if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent, PhoneCallEvent):
                     event.session_time = event.session_time - start_session_time_clock
                 else:
                     event.session_time = event.session_time - start_session_time_sensor
@@ -67,6 +67,7 @@ class SQLiteDatabase:
             13: lambda: ForegroundApplicationEvent(session_time, data_string_0),
             14: lambda: PowerConnectedEvent(session_time, data_int_0 == 1),
             15: lambda: DaydreamActiveEvent(session_time, data_int_0 == 1),
+            16: lambda: PhoneCallEvent(session_time, ["INCOMING_CALL", "INCOMING_CALL_ATTENDED", "INCOMING_CALL_MISSED", "OUTGOING_CALL_PLACED", "CALL_ENDED"][data_int_0], data_string_0 if data_string_0 else None),
         }
 
         return handler_map[event_type]()
@@ -75,3 +76,4 @@ class SQLiteDatabase:
         rows = self.cursor.execute('SELECT type, session_time, data_int_0, data_float_0, data_float_1, data_float_2, data_float_3, data_string_0 FROM log_entries WHERE session_id={} ORDER BY session_time ASC'.format(session_id))
         
         return [self._logevent_from_db(*row) for row in rows]
+

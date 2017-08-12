@@ -393,6 +393,21 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.name("type").value("DAYDREAM_ACTIVE");
                             Writer.name("is_active").value(cursor.getInt(data_int_0_idx) == 1);
                             break;
+                        case PHONE_CALL:
+                            Writer.name("type").value("PHONE_CALL");
+                            switch(LoggingService.PhoneCallEvents.fromInt(cursor.getInt(data_int_0_idx))) {
+                                case INCOMING_CALL: Writer.name("state").value("INCOMING_CALL"); break;
+                                case INCOMING_CALL_ATTENDED: Writer.name("state").value("INCOMING_CALL_ATTENDED"); break;
+                                case INCOMING_CALL_MISSED: Writer.name("state").value("INCOMING_CALL_MISSED"); break;
+                                case OUTGOING_CALL_PLACED: Writer.name("state").value("OUTGOING_CALL_PLACED"); break;
+                                case CALL_ENDED: Writer.name("state").value("CALL_ENDED"); break;
+                            }
+
+                            String phoneNumber = cursor.getString(data_string_0_idx);
+                            if(!phoneNumber.isEmpty()) {
+                                Writer.name("number").value(phoneNumber);
+                            }
+                            break;
                     }
                     Writer.endObject();
                     i++;
@@ -611,6 +626,21 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.name("type").value("DAYDREAM_ACTIVE");
                             Writer.name("is_active").value(cursor.getInt(data_int_0_idx) == 1);
                             break;
+                        case PHONE_CALL:
+                            Writer.name("type").value("PHONE_CALL");
+                            switch(LoggingService.PhoneCallEvents.fromInt(cursor.getInt(data_int_0_idx))) {
+                                case INCOMING_CALL: Writer.name("state").value("INCOMING_CALL"); break;
+                                case INCOMING_CALL_ATTENDED: Writer.name("state").value("INCOMING_CALL_ATTENDED"); break;
+                                case INCOMING_CALL_MISSED: Writer.name("state").value("INCOMING_CALL_MISSED"); break;
+                                case OUTGOING_CALL_PLACED: Writer.name("state").value("OUTGOING_CALL_PLACED"); break;
+                                case CALL_ENDED: Writer.name("state").value("CALL_ENDED"); break;
+                            }
+
+                            String phoneNumber = cursor.getString(data_string_0_idx);
+                            if(!phoneNumber.isEmpty()) {
+                                Writer.name("number").value(phoneNumber);
+                            }
+                            break;
                     }
                     Writer.endObject();
                 }
@@ -683,6 +713,13 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
 
     public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, String Data0)
     {
-        addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, 0.0f, 0.0f, 0.0f, 0.0f, Data0);
+        insertLogEntry(SessionID, SessionTime, Type, 0, Data0);
+    }
+
+    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, int Data0, String Data1)
+    {
+        if(Data1 == null)
+            Data1 = "";
+        addLogEntryToInsertStatement(SessionID, SessionTime, Type, Data0, 0.0f, 0.0f, 0.0f, 0.0f, Data1);
     }
 }

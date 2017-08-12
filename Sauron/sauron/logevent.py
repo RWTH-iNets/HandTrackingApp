@@ -105,3 +105,9 @@ class DaydreamActiveEvent(LogEventBase):
         self.is_connected = is_active
 
 
+class PhoneCallEvent(LogEventBase):
+    def __init__(self, session_time, state, number):
+        super().__init__(session_time)
+        self.state = state
+        self.number = number
+

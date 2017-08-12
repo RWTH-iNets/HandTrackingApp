@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ActivityCompat.OnRequestPermissionsResultCallback {
 
     protected static final int PERMISSION_REQUEST_STORAGE = 3;
+    protected static final int PERMISSION_REQUEST_PHONE_STATE = 4;
+    protected static final int PERMISSION_REQUEST_OUTGOING_CALLS = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,9 +137,7 @@ public class MainActivity extends AppCompatActivity
         switch (requestCode) {
             case PERMISSION_REQUEST_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     new AlertDialog.Builder(this)
                             .setMessage(getString(R.string.permission_dialog_thanks))
                             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -146,7 +146,6 @@ public class MainActivity extends AppCompatActivity
                             .show();
 
                 } else {
-
                     new AlertDialog.Builder(this)
                             .setMessage(getString(R.string.permission_dialog_not_granted))
                             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -154,8 +153,9 @@ public class MainActivity extends AppCompatActivity
                             })
                             .show();
                 }
-                return;
             }
+
+            // TODO: phone call permission stuff
 
             // other 'case' lines to check for other
             // permissions this app might request

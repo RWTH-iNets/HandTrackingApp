@@ -11,10 +11,12 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.TrafficStats;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v7.app.NotificationCompat;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.rvalerio.fgchecker.AppChecker;
@@ -55,7 +57,8 @@ public class LoggingService extends Service implements SensorEventListener
         TRAFFIC_STATS(12),
         FOREGROUND_APPLICATION(13),
         POWER_CONNECTED(14),
-        DAYDREAM_ACTIVE(15);
+        DAYDREAM_ACTIVE(15),
+        PHONE_CALL(16);
 
         private final int value;
 
@@ -82,10 +85,46 @@ public class LoggingService extends Service implements SensorEventListener
         }
     };
 
+    public enum PhoneCallEvents
+    {
+        INCOMING_CALL(0),
+        INCOMING_CALL_ATTENDED(1),
+        INCOMING_CALL_MISSED(2),
+        OUTGOING_CALL_PLACED(3),
+        CALL_ENDED(4);
+
+        private final int value;
+
+        PhoneCallEvents(int value)
+        {
+            this.value = value;
+        }
+
+        public int getValue()
+        {
+            return value;
+        }
+
+        public static PhoneCallEvents fromInt(int value)
+        {
+            PhoneCallEvents[] values = values();
+            for(PhoneCallEvents type : values)
+            {
+                if(type.getValue() == value)
+                    return type;
+            }
+
+            return null;
+        }
+    };
+
     private LoggingServiceDBHelper getDBHelper()
     {
         return LoggingServiceDBHelper.getInstance(this);
     }
+
+    private String mLastCallNumber = null;
+    private String mLastCallState = null;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver()
     {
@@ -127,6 +166,50 @@ public class LoggingService extends Service implements SensorEventListener
                 case Intent.ACTION_POWER_DISCONNECTED:
                     getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.POWER_CONNECTED, 0);
                     break;
+
+                // Phone state
+                case Intent.ACTION_NEW_OUTGOING_CALL: {
+                    final Bundle extras = intent.getExtras();
+                    if (extras != null) {
+                        mLastCallNumber = extras.getString(Intent.EXTRA_PHONE_NUMBER);
+                        getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.PHONE_CALL, PhoneCallEvents.OUTGOING_CALL_PLACED.getValue(), mLastCallNumber);
+                    }
+                    break;
+                }
+                case TelephonyManager.ACTION_PHONE_STATE_CHANGED: {
+                    // See https://stackoverflow.com/questions/8547519/how-to-detect-incoming-call-status-in-android?lq=1
+                    final Bundle extras = intent.getExtras();
+                    if (extras != null) {
+                        final String state = extras.getString(TelephonyManager.EXTRA_STATE);
+                        if (state != null) {
+                            if (state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+                                mLastCallNumber = extras.getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+                                getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.PHONE_CALL, PhoneCallEvents.INCOMING_CALL.getValue(), mLastCallNumber);
+                            }
+                            if (mLastCallState != null) {
+                                if (state.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                                    if (mLastCallState.equals(TelephonyManager.EXTRA_STATE_RINGING) && mLastCallNumber != null) {
+                                        // Call has been attended
+                                        getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.PHONE_CALL, PhoneCallEvents.INCOMING_CALL_ATTENDED.getValue(), mLastCallNumber);
+                                    }
+                                } else if (state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+                                    if (mLastCallState.equals(TelephonyManager.EXTRA_STATE_RINGING) && mLastCallNumber != null) {
+                                        // Call has been missed
+                                        getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.PHONE_CALL, PhoneCallEvents.INCOMING_CALL_MISSED.getValue(), mLastCallNumber);
+                                    } else if (mLastCallState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                                        // Call has ended
+                                        getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.PHONE_CALL, PhoneCallEvents.CALL_ENDED.getValue(), mLastCallNumber);
+                                    }
+
+                                    mLastCallNumber = null;
+                                }
+                            }
+
+                            mLastCallState = state;
+                        }
+                    }
+                    break;
+                }
             }
         }
     };
@@ -260,6 +343,8 @@ public class LoggingService extends Service implements SensorEventListener
         filter.addAction(Intent.ACTION_DREAMING_STOPPED);
         filter.addAction(Intent.ACTION_POWER_CONNECTED);
         filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+        filter.addAction(Intent.ACTION_NEW_OUTGOING_CALL);
+        filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver, filter);
 
         startLoggingSensors();

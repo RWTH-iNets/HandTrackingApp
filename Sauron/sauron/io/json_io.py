@@ -1,6 +1,6 @@
 import json
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent, PhoneCallEvent
 from ..logsession import LogSession
 
 
@@ -26,7 +26,7 @@ class JSONDatabase:
         start_session_time_clock = session.events[0].session_time
         start_session_time_sensor = session.events[1].session_time
         for event in session.events:
-            if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent):
+            if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent, PhoneCallEvent):
                 event.session_time = event.session_time - start_session_time_clock
             else:
                 event.session_time = event.session_time - start_session_time_sensor
@@ -54,6 +54,7 @@ class JSONDatabase:
             'FOREGROUND_APPLICATION': lambda: ForegroundApplicationEvent(session_time, event_data['package_name']),
             'POWER_CONNECTED': lambda: PowerConnectedEvent(session_time, event_data['is_connected']),
             'DAYDREAM_ACTIVE': lambda: DaydreamActiveEvent(session_time, event_data['is_active']),
+            'PHONE_CALL': lambda: PhoneCallEvent(session_time, event_data['state'], event_data['number'] if 'number' in event_data else None),
         }
 
         return handler_map[event_data['type']]()
@@ -64,3 +65,4 @@ class JSONDatabase:
 
     def get_session(self, session_id):
         return self.sessions[session_id] if session_id in self.sessions else None
+

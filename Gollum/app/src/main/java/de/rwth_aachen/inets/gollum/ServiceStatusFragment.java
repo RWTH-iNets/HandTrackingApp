@@ -1,10 +1,13 @@
 package de.rwth_aachen.inets.gollum;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.DatabaseUtils;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -15,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.database.DatabaseUtilsCompat;
 import android.support.v7.app.AlertDialog;
@@ -92,6 +96,11 @@ public class ServiceStatusFragment extends Fragment {
                     if(Utils.postLollipop() && !Utils.hasUsageStatsPermission(view.getContext()))
                     {
                         startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+                        return;
+                    }
+
+                    if(!verifyPhoneCallPermissions(getActivity()))
+                    {
                         return;
                     }
 
@@ -320,6 +329,31 @@ public class ServiceStatusFragment extends Fragment {
                 return true;
         }
         return false;
+    }
+
+    public static boolean verifyPhoneCallPermissions(Activity activity) {
+        // Check if we have permissions
+        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    new String[]{Manifest.permission.READ_PHONE_STATE},
+                    MainActivity.PERMISSION_REQUEST_PHONE_STATE);
+
+            return false;
+        }
+
+        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.PROCESS_OUTGOING_CALLS) != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    new String[]{Manifest.permission.PROCESS_OUTGOING_CALLS},
+                    MainActivity.PERMISSION_REQUEST_OUTGOING_CALLS);
+
+            return false;
+        }
+
+        return true;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
