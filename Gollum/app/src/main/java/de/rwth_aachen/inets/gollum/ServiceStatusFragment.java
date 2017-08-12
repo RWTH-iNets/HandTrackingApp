@@ -13,6 +13,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.database.DatabaseUtilsCompat;
@@ -29,6 +30,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
+
+import com.rvalerio.fgchecker.AppChecker;
+import com.rvalerio.fgchecker.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +88,14 @@ public class ServiceStatusFragment extends Fragment {
             startStopButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    // Request permissions to determine current foreground application if required
+                    if(Utils.postLollipop() && !Utils.hasUsageStatsPermission(view.getContext()))
+                    {
+                        startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+                        return;
+                    }
+
+                    // Start/stop service
                     if (isServiceRunning) {
                         stopService();
                     } else {

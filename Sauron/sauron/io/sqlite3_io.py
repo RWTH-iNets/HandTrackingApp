@@ -1,6 +1,6 @@
 import sqlite3
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent
 from ..logsession import LogSession
 
 
@@ -37,7 +37,7 @@ class SQLiteDatabase:
             start_session_time_clock = session.events[0].session_time
             start_session_time_sensor = session.events[1].session_time
             for event in session.events:
-                if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent):
+                if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent):
                     event.session_time = event.session_time - start_session_time_clock
                 else:
                     event.session_time = event.session_time - start_session_time_sensor
@@ -47,7 +47,7 @@ class SQLiteDatabase:
         return session
 
     @staticmethod
-    def _logevent_from_db(event_type, session_time, data_int_0, data_float_0, data_float_1, data_float_2, data_float_3):
+    def _logevent_from_db(event_type, session_time, data_int_0, data_float_0, data_float_1, data_float_2, data_float_3, data_string_0):
         session_time /= 1000000000
 
         handler_map = {
@@ -64,11 +64,14 @@ class SQLiteDatabase:
             10: lambda: PressureSensorEvent(session_time, data_float_0 * 100), # pressure stored as hPa
             11: lambda: AmbientTemperatureSensorEvent(session_time, data_float_0),
             12: lambda: TrafficStatsEvent(session_time, data_float_0, data_float_1, data_float_2, data_float_3),
+            13: lambda: ForegroundApplicationEvent(session_time, data_string_0),
+            14: lambda: PowerConnectedEvent(session_time, data_int_0 == 1),
+            15: lambda: DaydreamActiveEvent(session_time, data_int_0 == 1),
         }
 
         return handler_map[event_type]()
 
     def _get_all_events(self, session_id):
-        rows = self.cursor.execute('SELECT type, session_time, data_int_0, data_float_0, data_float_1, data_float_2, data_float_3 FROM log_entries WHERE session_id={} ORDER BY session_time ASC'.format(session_id))
+        rows = self.cursor.execute('SELECT type, session_time, data_int_0, data_float_0, data_float_1, data_float_2, data_float_3, data_string_0 FROM log_entries WHERE session_id={} ORDER BY session_time ASC'.format(session_id))
         
         return [self._logevent_from_db(*row) for row in rows]

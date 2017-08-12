@@ -19,7 +19,7 @@ import java.io.StringWriter;
 final class LoggingServiceDBHelper extends SQLiteOpenHelper
 {
     private static final String DATABASE_NAME = "LoggingService.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private static LoggingServiceDBHelper sSingletonInstance = null;
     private Context context;
@@ -55,7 +55,8 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                 "`data_float_0` FLOAT NOT NULL DEFAULT '0'," +
                 "`data_float_1` FLOAT NOT NULL DEFAULT '0'," +
                 "`data_float_2` FLOAT NOT NULL DEFAULT '0'," +
-                "`data_float_3` FLOAT NOT NULL DEFAULT '0'" +
+                "`data_float_3` FLOAT NOT NULL DEFAULT '0'," +
+                "`data_string_0` TEXT NOT NULL DEFAULT ''" +
                 ")");
 
         sqLiteDatabase.execSQL("CREATE TABLE `log_sessions` (" +
@@ -119,7 +120,8 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                 "`data_float_0` FLOAT NOT NULL DEFAULT '0'," +
                 "`data_float_1` FLOAT NOT NULL DEFAULT '0'," +
                 "`data_float_2` FLOAT NOT NULL DEFAULT '0'," +
-                "`data_float_3` FLOAT NOT NULL DEFAULT '0'" +
+                "`data_float_3` FLOAT NOT NULL DEFAULT '0'," +
+                "`data_string_0` TEXT NOT NULL DEFAULT ''" +
                 ")");
 
         db.execSQL("CREATE TABLE `log_sessions` (" +
@@ -280,7 +282,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
             offset += data.length();
             string_writer.getBuffer().setLength(0);
 
-            cursor = db.query("log_entries", new String[]{"session_time", "type", "data_int_0", "data_float_0", "data_float_1", "data_float_2", "data_float_3"}, "session_id = ?", new String[]{String.valueOf(SessionID)}, null, null, null);
+            cursor = db.query("log_entries", new String[]{"session_time", "type", "data_int_0", "data_float_0", "data_float_1", "data_float_2", "data_float_3", "data_string_0"}, "session_id = ?", new String[]{String.valueOf(SessionID)}, null, null, null);
             if (cursor != null)
             {
                 int session_time_idx = cursor.getColumnIndex("session_time");
@@ -290,6 +292,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                 int data_float_1_idx = cursor.getColumnIndex("data_float_1");
                 int data_float_2_idx = cursor.getColumnIndex("data_float_2");
                 int data_float_3_idx = cursor.getColumnIndex("data_float_3");
+                int data_string_0_idx = cursor.getColumnIndex("data_string_0");
 
                 int i = 0;
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext())
@@ -377,6 +380,18 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.name("mobile_tx_bytes").value(cursor.getFloat(data_float_1_idx));
                             Writer.name("total_rx_bytes").value(cursor.getFloat(data_float_2_idx));
                             Writer.name("total_tx_bytes").value(cursor.getFloat(data_float_3_idx));
+                            break;
+                        case FOREGROUND_APPLICATION:
+                            Writer.name("type").value("FOREGROUND_APPLICATION");
+                            Writer.name("package_name").value(cursor.getString(data_string_0_idx));
+                            break;
+                        case POWER_CONNECTED:
+                            Writer.name("type").value("POWER_CONNECTED");
+                            Writer.name("is_connected").value(cursor.getInt(data_int_0_idx) == 1);
+                            break;
+                        case DAYDREAM_ACTIVE:
+                            Writer.name("type").value("DAYDREAM_ACTIVE");
+                            Writer.name("is_active").value(cursor.getInt(data_int_0_idx) == 1);
                             break;
                     }
                     Writer.endObject();
@@ -486,7 +501,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
             Writer.name("events");
             Writer.beginArray();
 
-            cursor = db.query("log_entries", new String[]{"session_time", "type", "data_int_0", "data_float_0", "data_float_1", "data_float_2", "data_float_3"}, "session_id = ?", new String[]{String.valueOf(SessionID)}, null, null, null);
+            cursor = db.query("log_entries", new String[]{"session_time", "type", "data_int_0", "data_float_0", "data_float_1", "data_float_2", "data_float_3", "data_string_0"}, "session_id = ?", new String[]{String.valueOf(SessionID)}, null, null, null);
             if (cursor != null)
             {
                 int session_time_idx = cursor.getColumnIndex("session_time");
@@ -496,6 +511,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                 int data_float_1_idx = cursor.getColumnIndex("data_float_1");
                 int data_float_2_idx = cursor.getColumnIndex("data_float_2");
                 int data_float_3_idx = cursor.getColumnIndex("data_float_3");
+                int data_string_0_idx = cursor.getColumnIndex("data_string_0");
 
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext())
                 {
@@ -583,6 +599,18 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.name("total_rx_bytes").value(cursor.getFloat(data_float_2_idx));
                             Writer.name("total_tx_bytes").value(cursor.getFloat(data_float_3_idx));
                             break;
+                        case FOREGROUND_APPLICATION:
+                            Writer.name("type").value("FOREGROUND_APPLICATION");
+                            Writer.name("package_name").value(cursor.getString(data_string_0_idx));
+                            break;
+                        case POWER_CONNECTED:
+                            Writer.name("type").value("POWER_CONNECTED");
+                            Writer.name("is_connected").value(cursor.getInt(data_int_0_idx) == 1);
+                            break;
+                        case DAYDREAM_ACTIVE:
+                            Writer.name("type").value("DAYDREAM_ACTIVE");
+                            Writer.name("is_active").value(cursor.getInt(data_int_0_idx) == 1);
+                            break;
                     }
                     Writer.endObject();
                 }
@@ -609,11 +637,11 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         }
 
         db.beginTransaction();
-        mInsertStatement = db.compileStatement("INSERT INTO `log_entries` (session_id, session_time, type, data_int_0, data_float_0, data_float_1, data_float_2, data_float_3) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        mInsertStatement = db.compileStatement("INSERT INTO `log_entries` (session_id, session_time, type, data_int_0, data_float_0, data_float_1, data_float_2, data_float_3, data_string_0) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         mNumRowsInInsertStatement = 0;
     }
 
-    private void addLogEntryToInsertStatement(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, int DataInt0, float DataFloat0, float DataFloat1, float DataFloat2, float DataFloat3)
+    private void addLogEntryToInsertStatement(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, int DataInt0, float DataFloat0, float DataFloat1, float DataFloat2, float DataFloat3, String DataString0)
     {
         if(mInsertStatement == null)
         {
@@ -628,6 +656,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         mInsertStatement.bindDouble(6, DataFloat1);
         mInsertStatement.bindDouble(7, DataFloat2);
         mInsertStatement.bindDouble(8, DataFloat3);
+        mInsertStatement.bindString(9, DataString0);
         mInsertStatement.execute();
 
         ++mNumRowsInInsertStatement;
@@ -639,16 +668,21 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
 
     public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type)
     {
-        addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, 0.0f, 0.0f, 0.0f, 0.0f);
+        addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, 0.0f, 0.0f, 0.0f, 0.0f, "");
     }
 
     public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, int Data0)
     {
-        addLogEntryToInsertStatement(SessionID, SessionTime, Type, Data0, 0.0f, 0.0f, 0.0f, 0.0f);
+        addLogEntryToInsertStatement(SessionID, SessionTime, Type, Data0, 0.0f, 0.0f, 0.0f, 0.0f, "");
     }
 
     public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, float Data0, float Data1, float Data2, float Data3)
     {
-        addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, Data0, Data1, Data2, Data3);
+        addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, Data0, Data1, Data2, Data3, "");
+    }
+
+    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, String Data0)
+    {
+        addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, 0.0f, 0.0f, 0.0f, 0.0f, Data0);
     }
 }

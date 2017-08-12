@@ -87,3 +87,21 @@ class TrafficStatsEvent(LogEventBase):
         self.total_tx_bytes = total_tx_bytes;
 
 
+class ForegroundApplicationEvent(LogEventBase):
+    def __init__(self, session_time, package_name):
+        super().__init__(session_time)
+        self.package_name = package_name
+
+
+class PowerConnectedEvent(LogEventBase):
+    def __init__(self, session_time, is_connected):
+        super().__init__(session_time)
+        self.is_connected = is_connected
+
+
+class DaydreamActiveEvent(LogEventBase):
+    def __init__(self, session_time, is_active):
+        super().__init__(session_time)
+        self.is_connected = is_active
+
+

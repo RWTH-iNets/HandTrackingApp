@@ -17,6 +17,8 @@ import android.os.SystemClock;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
+import com.rvalerio.fgchecker.AppChecker;
+
 public class LoggingService extends Service implements SensorEventListener
 {
     public static final String CONFIGURATION_TAG = "Configuration";
@@ -50,7 +52,10 @@ public class LoggingService extends Service implements SensorEventListener
         LIGHT(9),
         PRESSURE(10),
         AMBIENT_TEMPERATURE(11),
-        TRAFFIC_STATS(12);
+        TRAFFIC_STATS(12),
+        FOREGROUND_APPLICATION(13),
+        POWER_CONNECTED(14),
+        DAYDREAM_ACTIVE(15);
 
         private final int value;
 
@@ -89,22 +94,38 @@ public class LoggingService extends Service implements SensorEventListener
         {
             switch(intent.getAction())
             {
+                // Screen on/off?
                 case Intent.ACTION_SCREEN_ON:
                     getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.SCREEN_ON_OFF, 1);
 
                     if(mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON)
                     {
-                        startLoggingSensors();
+                        startLogging();
                     }
                     break;
-
                 case Intent.ACTION_SCREEN_OFF:
                     getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.SCREEN_ON_OFF, 0);
 
                     if(mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON)
                     {
-                        stopLoggingSensors();
+                        stopLogging();
                     }
+                    break;
+
+                // Daydream on/off?
+                case Intent.ACTION_DREAMING_STARTED:
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.DAYDREAM_ACTIVE, 1);
+                    break;
+                case Intent.ACTION_DREAMING_STOPPED:
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.DAYDREAM_ACTIVE, 0);
+                    break;
+
+                // Power cord plugged in?
+                case Intent.ACTION_POWER_CONNECTED:
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.POWER_CONNECTED, 1);
+                    break;
+                case Intent.ACTION_POWER_DISCONNECTED:
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.POWER_CONNECTED, 0);
                     break;
             }
         }
@@ -139,6 +160,31 @@ public class LoggingService extends Service implements SensorEventListener
         }
     };
 
+    private String mLastForegroundApplication = "";
+    private AppChecker mForegroundAppChecker = new AppChecker();
+
+    public void startForegroundAppChecker()
+    {
+        mForegroundAppChecker.other(new AppChecker.Listener() {
+            @Override
+            public void onForeground(String packageName) {
+                if(!packageName.equals(mLastForegroundApplication))
+                {
+                    mLastForegroundApplication = packageName;
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.FOREGROUND_APPLICATION, mLastForegroundApplication);
+                }
+            }
+        });
+
+        mForegroundAppChecker.timeout(50);
+        mForegroundAppChecker.start(getApplicationContext());
+    }
+
+    public void stopForegroundAppChecker()
+    {
+        mForegroundAppChecker.stop();
+    }
+
     @Override
     public void onCreate()
     {
@@ -156,12 +202,6 @@ public class LoggingService extends Service implements SensorEventListener
     {
         if(intent != null) {
             mConfiguration = (LoggingServiceConfiguration) intent.getSerializableExtra(CONFIGURATION_TAG);
-
-            // Initialize BroadcastReceiver
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_SCREEN_ON);
-            filter.addAction(Intent.ACTION_SCREEN_OFF);
-            registerReceiver(mBroadcastReceiver, filter);
 
             // Initialize sensors
             mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -182,14 +222,8 @@ public class LoggingService extends Service implements SensorEventListener
             mCurrentLogSessionID = getDBHelper().insertLogSession(mConfiguration);
             getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.LOG_STARTED);
 
-            //this needs to happen after session created
-            startLoggingSensors();
-
-            mLastMobileRx = TrafficStats.getMobileRxBytes();
-            mLastMobileTx = TrafficStats.getMobileTxBytes();
-            mLastTotalRx = TrafficStats.getTotalRxBytes();
-            mLastTotalTx = TrafficStats.getTotalTxBytes();
-            mNetworkTrafficLogger.run();
+            // This needs to happen after session created
+            startLogging();
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
             builder.setSmallIcon(R.drawable.ic_graphic_eq_black_24dp);
@@ -209,14 +243,45 @@ public class LoggingService extends Service implements SensorEventListener
     @Override
     public void onDestroy()
     {
-        mTaskHandler.removeCallbacks(mNetworkTrafficLogger);
-        stopLoggingSensors();
-        unregisterReceiver(mBroadcastReceiver);
+        stopLogging();
 
         //this needs to come after listeners have been detached.
         getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.LOG_STOPPED);
 
         stopForeground(true);
+    }
+
+    private void startLogging()
+    {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_DREAMING_STARTED);
+        filter.addAction(Intent.ACTION_DREAMING_STOPPED);
+        filter.addAction(Intent.ACTION_POWER_CONNECTED);
+        filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+        registerReceiver(mBroadcastReceiver, filter);
+
+        startLoggingSensors();
+
+        mLastMobileRx = TrafficStats.getMobileRxBytes();
+        mLastMobileTx = TrafficStats.getMobileTxBytes();
+        mLastTotalRx = TrafficStats.getTotalRxBytes();
+        mLastTotalTx = TrafficStats.getTotalTxBytes();
+        mNetworkTrafficLogger.run();
+
+        startForegroundAppChecker();
+    }
+
+    private void stopLogging()
+    {
+        stopForegroundAppChecker();
+
+        mTaskHandler.removeCallbacks(mNetworkTrafficLogger);
+
+        stopLoggingSensors();
+
+        unregisterReceiver(mBroadcastReceiver);
     }
 
     private void startLoggingSensors()

@@ -1,6 +1,6 @@
 import json
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent
 from ..logsession import LogSession
 
 
@@ -26,7 +26,7 @@ class JSONDatabase:
         start_session_time_clock = session.events[0].session_time
         start_session_time_sensor = session.events[1].session_time
         for event in session.events:
-            if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent):
+            if type(event) in (LogStartedEvent, LogStoppedEvent, ScreenOnOffEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent):
                 event.session_time = event.session_time - start_session_time_clock
             else:
                 event.session_time = event.session_time - start_session_time_sensor
@@ -51,6 +51,9 @@ class JSONDatabase:
             'PRESSURE': lambda: PressureSensorEvent(session_time, event_data['value'] * 100), # pressure stored as hPa
             'AMBIENT_TEMPERATURE': lambda: AmbientTemperatureSensorEvent(session_time, event_data['value']),
             'TRAFFIC_STATS': lambda: TrafficStatsEvent(session_time, event_data['mobile_rx_bytes'], event_data['mobile_tx_bytes'], event_data['total_rx_bytes'], event_data['total_tx_bytes']),
+            'FOREGROUND_APPLICATION': lambda: ForegroundApplicationEvent(session_time, event_data['package_name']),
+            'POWER_CONNECTED': lambda: PowerConnectedEvent(session_time, event_data['is_connected']),
+            'DAYDREAM_ACTIVE': lambda: DaydreamActiveEvent(session_time, event_data['is_active']),
         }
 
         return handler_map[event_data['type']]()
