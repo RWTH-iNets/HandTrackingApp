@@ -92,18 +92,6 @@ public class ServiceStatusFragment extends Fragment {
             startStopButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // Request permissions to determine current foreground application if required
-                    if(Utils.postLollipop() && !Utils.hasUsageStatsPermission(view.getContext()))
-                    {
-                        startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
-                        return;
-                    }
-
-                    if(!verifyPhoneCallPermissions(getActivity()))
-                    {
-                        return;
-                    }
-
                     // Start/stop service
                     if (isServiceRunning) {
                         stopService();
@@ -250,6 +238,18 @@ public class ServiceStatusFragment extends Fragment {
 
     private void startService(String NewSessionName)
     {
+        // Request permissions to determine current foreground application if required
+        if(Utils.postLollipop() && !Utils.hasUsageStatsPermission(getContext()))
+        {
+            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+            return;
+        }
+
+        if(!verifyPhoneCallPermissions(getActivity()))
+        {
+            return;
+        }
+
         if(checkIsServiceRunning() != isServiceRunning)
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
