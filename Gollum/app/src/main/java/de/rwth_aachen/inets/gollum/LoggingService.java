@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.provider.Telephony;
 import android.support.v7.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -58,7 +59,8 @@ public class LoggingService extends Service implements SensorEventListener
         FOREGROUND_APPLICATION(13),
         POWER_CONNECTED(14),
         DAYDREAM_ACTIVE(15),
-        PHONE_CALL(16);
+        PHONE_CALL(16),
+        SMS_RECEIVED(17);
 
         private final int value;
 
@@ -210,6 +212,11 @@ public class LoggingService extends Service implements SensorEventListener
                     }
                     break;
                 }
+
+                // SMS
+                case Telephony.Sms.Intents.SMS_RECEIVED_ACTION:
+                    getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.SMS_RECEIVED);
+                    break;
             }
         }
     };
@@ -345,6 +352,7 @@ public class LoggingService extends Service implements SensorEventListener
         filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
         filter.addAction(Intent.ACTION_NEW_OUTGOING_CALL);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+        filter.addAction(Telephony.Sms.Intents.SMS_RECEIVED_ACTION);
         registerReceiver(mBroadcastReceiver, filter);
 
         startLoggingSensors();

@@ -408,6 +408,9 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                                 Writer.name("number").value(phoneNumber);
                             }
                             break;
+                        case SMS_RECEIVED:
+                            Writer.name("type").value("SMS_RECEIVED");
+                            break;
                     }
                     Writer.endObject();
                     i++;
@@ -640,6 +643,9 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             if(!phoneNumber.isEmpty()) {
                                 Writer.name("number").value(phoneNumber);
                             }
+                            break;
+                        case SMS_RECEIVED:
+                            Writer.name("type").value("SMS_RECEIVED");
                             break;
                     }
                     Writer.endObject();

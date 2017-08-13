@@ -111,3 +111,8 @@ class PhoneCallEvent(LogEventBase):
         self.state = state
         self.number = number
 
+
+class SMSReceivedEvent(LogEventBase):
+    def __init__(self, session_time):
+        super().__init__(session_time)
+
