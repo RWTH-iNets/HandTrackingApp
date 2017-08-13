@@ -239,7 +239,12 @@ public class LoggingService extends Service implements SensorEventListener
             long CurTotalRx = TrafficStats.getTotalRxBytes();
             long CurTotalTx = TrafficStats.getTotalTxBytes();
 
-            getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.TRAFFIC_STATS, (int)(CurMobileRx - mLastMobileRx), (int)(CurMobileTx - mLastMobileTx), (int)(CurTotalRx - mLastTotalRx), (int)(CurTotalTx - mLastTotalTx));
+            long DeltaMobileRx = CurMobileRx - mLastMobileRx;
+            long DeltaMobileTx = CurMobileTx - mLastMobileTx;
+            long DeltaWiFiRx = (CurTotalRx - mLastTotalRx) - DeltaMobileRx;
+            long DeltaWiFiTx = (CurTotalTx - mLastTotalTx) - DeltaMobileTx;
+
+            getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.TRAFFIC_STATS, (int)DeltaMobileRx, (int)DeltaMobileTx, (int)DeltaWiFiRx, (int)DeltaWiFiTx);
 
             mLastMobileRx = CurMobileRx;
             mLastMobileTx = CurMobileTx;

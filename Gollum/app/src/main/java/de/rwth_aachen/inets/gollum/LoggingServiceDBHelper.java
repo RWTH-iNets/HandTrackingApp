@@ -378,8 +378,8 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.name("type").value("TRAFFIC_STATS");
                             Writer.name("mobile_rx_bytes").value(cursor.getFloat(data_float_0_idx));
                             Writer.name("mobile_tx_bytes").value(cursor.getFloat(data_float_1_idx));
-                            Writer.name("total_rx_bytes").value(cursor.getFloat(data_float_2_idx));
-                            Writer.name("total_tx_bytes").value(cursor.getFloat(data_float_3_idx));
+                            Writer.name("wifi_rx_bytes").value(cursor.getFloat(data_float_2_idx));
+                            Writer.name("wifi_tx_bytes").value(cursor.getFloat(data_float_3_idx));
                             break;
                         case FOREGROUND_APPLICATION:
                             Writer.name("type").value("FOREGROUND_APPLICATION");
@@ -614,8 +614,8 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.name("type").value("TRAFFIC_STATS");
                             Writer.name("mobile_rx_bytes").value(cursor.getFloat(data_float_0_idx));
                             Writer.name("mobile_tx_bytes").value(cursor.getFloat(data_float_1_idx));
-                            Writer.name("total_rx_bytes").value(cursor.getFloat(data_float_2_idx));
-                            Writer.name("total_tx_bytes").value(cursor.getFloat(data_float_3_idx));
+                            Writer.name("wifi_rx_bytes").value(cursor.getFloat(data_float_2_idx));
+                            Writer.name("wifi_tx_bytes").value(cursor.getFloat(data_float_3_idx));
                             break;
                         case FOREGROUND_APPLICATION:
                             Writer.name("type").value("FOREGROUND_APPLICATION");

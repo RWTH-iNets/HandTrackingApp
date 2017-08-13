@@ -44,7 +44,7 @@ class JSONDatabase:
             'LIGHT': lambda: LightSensorEvent(session_time, event_data['value']),
             'PRESSURE': lambda: PressureSensorEvent(session_time, event_data['value'] * 100), # pressure stored as hPa
             'AMBIENT_TEMPERATURE': lambda: AmbientTemperatureSensorEvent(session_time, event_data['value']),
-            'TRAFFIC_STATS': lambda: TrafficStatsEvent(session_time, event_data['mobile_rx_bytes'], event_data['mobile_tx_bytes'], event_data['total_rx_bytes'], event_data['total_tx_bytes']),
+            'TRAFFIC_STATS': lambda: TrafficStatsEvent(session_time, event_data['mobile_rx_bytes'], event_data['mobile_tx_bytes'], event_data['wifi_rx_bytes'], event_data['wifi_tx_bytes']),
             'FOREGROUND_APPLICATION': lambda: ForegroundApplicationEvent(session_time, event_data['package_name']),
             'POWER_CONNECTED': lambda: PowerConnectedEvent(session_time, event_data['is_connected']),
             'DAYDREAM_ACTIVE': lambda: DaydreamActiveEvent(session_time, event_data['is_active']),

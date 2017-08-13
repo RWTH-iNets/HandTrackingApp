@@ -79,12 +79,12 @@ class AmbientTemperatureSensorEvent(LogEventBase):
 
 
 class TrafficStatsEvent(LogEventBase):
-    def __init__(self, session_time, mobile_rx_bytes, mobile_tx_bytes, total_rx_bytes, total_tx_bytes):
+    def __init__(self, session_time, mobile_rx_bytes, mobile_tx_bytes, wifi_rx_bytes, wifi_tx_bytes):
         super().__init__(session_time)
         self.mobile_rx_bytes = mobile_rx_bytes;
         self.mobile_tx_bytes = mobile_tx_bytes;
-        self.total_rx_bytes = total_rx_bytes;
-        self.total_tx_bytes = total_tx_bytes;
+        self.wifi_rx_bytes = wifi_rx_bytes;
+        self.wifi_tx_bytes = wifi_tx_bytes;
 
 
 class ForegroundApplicationEvent(LogEventBase):
