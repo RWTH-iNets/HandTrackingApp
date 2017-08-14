@@ -116,3 +116,10 @@ class SMSReceivedEvent(LogEventBase):
     def __init__(self, session_time):
         super().__init__(session_time)
 
+
+class LinearAccelerationEvent(LogEventBase):
+    def __init__(self, session_time, x, y, z):
+        super().__init__(session_time)
+        self.vector = Vector3(x, y, z)
+
+

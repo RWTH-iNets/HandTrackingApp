@@ -1,6 +1,6 @@
 import sqlite3
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent, PhoneCallEvent, SMSReceivedEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent, PhoneCallEvent, SMSReceivedEvent, LinearAccelerationEvent
 from ..logsession import LogSession
 from .utils import fix_session_event_timestamps
 
@@ -63,6 +63,7 @@ class SQLiteDatabase:
             15: lambda: DaydreamActiveEvent(session_time, data_int_0 == 1),
             16: lambda: PhoneCallEvent(session_time, ["INCOMING_CALL", "INCOMING_CALL_ATTENDED", "INCOMING_CALL_MISSED", "OUTGOING_CALL_PLACED", "CALL_ENDED"][data_int_0], data_string_0 if data_string_0 else None),
             17: lambda: SMSReceivedEvent(session_time),
+            18: lambda: LinearAccelerationEvent(session_time, data_float_0, data_float_1, data_float_2),
         }
 
         return handler_map[event_type]()

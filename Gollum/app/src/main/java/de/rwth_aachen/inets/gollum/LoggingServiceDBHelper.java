@@ -411,6 +411,15 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                         case SMS_RECEIVED:
                             Writer.name("type").value("SMS_RECEIVED");
                             break;
+                        case LINEAR_ACCELERATION:
+                            Writer.name("type").value("LINEAR_ACCELERATION");
+                            Writer.name("vector");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.endArray();
+                            break;
                     }
                     Writer.endObject();
                     i++;
@@ -646,6 +655,15 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case SMS_RECEIVED:
                             Writer.name("type").value("SMS_RECEIVED");
+                            break;
+                        case LINEAR_ACCELERATION:
+                            Writer.name("type").value("LINEAR_ACCELERATION");
+                            Writer.name("vector");
+                            Writer.beginArray();
+                            Writer.value(cursor.getFloat(data_float_0_idx));
+                            Writer.value(cursor.getFloat(data_float_1_idx));
+                            Writer.value(cursor.getFloat(data_float_2_idx));
+                            Writer.endArray();
                             break;
                     }
                     Writer.endObject();

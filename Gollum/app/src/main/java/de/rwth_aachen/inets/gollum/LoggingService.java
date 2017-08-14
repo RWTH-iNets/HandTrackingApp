@@ -37,6 +37,7 @@ public class LoggingService extends Service implements SensorEventListener
     private Sensor mLightSensor;
     private Sensor mPressureSensor;
     private Sensor mAmbientTemperatureSensor;
+    private Sensor mLinearAccelerationSensor;
     private Handler mTaskHandler = new Handler();
     private LoggingServiceConfiguration mConfiguration;
     private long mCurrentLogSessionID;
@@ -60,7 +61,8 @@ public class LoggingService extends Service implements SensorEventListener
         POWER_CONNECTED(14),
         DAYDREAM_ACTIVE(15),
         PHONE_CALL(16),
-        SMS_RECEIVED(17);
+        SMS_RECEIVED(17),
+        LINEAR_ACCELERATION(18);
 
         private final int value;
 
@@ -312,6 +314,7 @@ public class LoggingService extends Service implements SensorEventListener
             mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
             mPressureSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
             mAmbientTemperatureSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+            mLinearAccelerationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
             // Initialize log session
             mCurrentLogSessionID = getDBHelper().insertLogSession(mConfiguration);
@@ -439,6 +442,13 @@ public class LoggingService extends Service implements SensorEventListener
         } else {
             Log.e("SENSOR", "No Ambient Temperature sensor available!");
         }
+
+        if(mLinearAccelerationSensor != null) {
+            Log.i("SENSOR", "Using Linear Acceleration sensor [" + mLinearAccelerationSensor.getName() + "]");
+            mSensorManager.registerListener(this, mLinearAccelerationSensor, mConfiguration.SamplingInterval);
+        } else {
+            Log.e("SENSOR", "No Linear Acceleration sensor available!");
+        }
     }
 
     private void stopLoggingSensors()
@@ -488,6 +498,10 @@ public class LoggingService extends Service implements SensorEventListener
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
                 log_event_type = LogEventTypes.AMBIENT_TEMPERATURE;
                 num_values = 1;
+                break;
+            case Sensor.TYPE_LINEAR_ACCELERATION:
+                log_event_type = LogEventTypes.LINEAR_ACCELERATION;
+                num_values = 3;
                 break;
             default:
                 throw new RuntimeException("Invalid Sensor Type!");
