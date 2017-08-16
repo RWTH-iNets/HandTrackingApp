@@ -123,3 +123,6 @@ class LinearAccelerationEvent(LogEventBase):
         self.vector = Vector3(x, y, z)
 
 
+def is_sensor_event(event):
+    return type(event) in (RotationVectorEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, LinearAccelerationEvent)
+

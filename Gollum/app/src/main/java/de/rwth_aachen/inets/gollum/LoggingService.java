@@ -29,6 +29,7 @@ public class LoggingService extends Service implements SensorEventListener
     public static final int NOTIFICATION_ID = 1;
 
     private SensorManager mSensorManager;
+    private Sensor mGameRotationVectorSensor;
     private Sensor mRotationVectorSensor;
     private Sensor mGyroscopeSensor;
     private Sensor mAccelerometerSensor;
@@ -246,7 +247,7 @@ public class LoggingService extends Service implements SensorEventListener
             long DeltaWiFiRx = (CurTotalRx - mLastTotalRx) - DeltaMobileRx;
             long DeltaWiFiTx = (CurTotalTx - mLastTotalTx) - DeltaMobileTx;
 
-            getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.TRAFFIC_STATS, (int)DeltaMobileRx, (int)DeltaMobileTx, (int)DeltaWiFiRx, (int)DeltaWiFiTx);
+            getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.TRAFFIC_STATS, 0, (float)DeltaMobileRx, (float)DeltaMobileTx, (float)DeltaWiFiRx, (float)DeltaWiFiTx);
 
             mLastMobileRx = CurMobileRx;
             mLastMobileTx = CurMobileTx;
@@ -265,7 +266,7 @@ public class LoggingService extends Service implements SensorEventListener
         mForegroundAppChecker.other(new AppChecker.Listener() {
             @Override
             public void onForeground(String packageName) {
-                if(!packageName.equals(mLastForegroundApplication))
+                if(packageName != null && !packageName.equals(mLastForegroundApplication))
                 {
                     mLastForegroundApplication = packageName;
                     getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.FOREGROUND_APPLICATION, mLastForegroundApplication);
@@ -303,10 +304,8 @@ public class LoggingService extends Service implements SensorEventListener
             // Initialize sensors
             mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-            mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
-            if (mRotationVectorSensor == null)
-                mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-
+            mGameRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+            mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
             mGyroscopeSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
             mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             mMagnetometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -387,64 +386,71 @@ public class LoggingService extends Service implements SensorEventListener
 
     private void startLoggingSensors()
     {
+        if(mGameRotationVectorSensor != null) {
+            Log.i("SENSOR", "Using GameRotationVector sensor [" + mGameRotationVectorSensor.getName() + "], Power: " + mGameRotationVectorSensor.getPower() + "mA, MinDelay: " + mGameRotationVectorSensor.getMinDelay() + "us, MaxRange: " + mGameRotationVectorSensor.getMaximumRange() + ", Resolution: " + mGameRotationVectorSensor.getResolution());
+            mSensorManager.registerListener(this, mGameRotationVectorSensor, mConfiguration.SamplingInterval);
+        } else {
+            Log.e("SENSOR", "No GameRotationVector sensor available!");
+        }
+
         if(mRotationVectorSensor != null) {
-            Log.i("SENSOR", "Using RotationVector sensor [" + mRotationVectorSensor.getName() + "]");
+            Log.i("SENSOR", "Using RotationVector sensor [" + mRotationVectorSensor.getName() + "], Power: " + mRotationVectorSensor.getPower() + "mA, MinDelay: " + mRotationVectorSensor.getMinDelay() + "us, MaxRange: " + mRotationVectorSensor.getMaximumRange() + ", Resolution: " + mRotationVectorSensor.getResolution());
             mSensorManager.registerListener(this, mRotationVectorSensor, mConfiguration.SamplingInterval);
         } else {
             Log.e("SENSOR", "No RotationVector sensor available!");
         }
 
         if(mGyroscopeSensor != null) {
-            Log.i("SENSOR", "Using Gyroscope sensor [" + mGyroscopeSensor.getName() + "]");
+            Log.i("SENSOR", "Using Gyroscope sensor [" + mGyroscopeSensor.getName() + "], Power: " + mGyroscopeSensor.getPower() + "mA, MinDelay: " + mGyroscopeSensor.getMinDelay() + "us, MaxRange: " + mGyroscopeSensor.getMaximumRange() + ", Resolution: " + mGyroscopeSensor.getResolution());
             mSensorManager.registerListener(this, mGyroscopeSensor, mConfiguration.SamplingInterval);
         } else {
             Log.e("SENSOR", "No Gyroscope sensor available!");
         }
 
         if(mAccelerometerSensor != null) {
-            Log.i("SENSOR", "Using Accelerometer sensor [" + mAccelerometerSensor.getName() + "]");
+            Log.i("SENSOR", "Using Accelerometer sensor [" + mAccelerometerSensor.getName() + "], Power: " + mAccelerometerSensor.getPower() + "mA, MinDelay: " + mAccelerometerSensor.getMinDelay() + "us, MaxRange: " + mAccelerometerSensor.getMaximumRange() + ", Resolution: " + mAccelerometerSensor.getResolution());
             mSensorManager.registerListener(this, mAccelerometerSensor, mConfiguration.SamplingInterval);
         } else {
             Log.e("SENSOR", "No Accelerometer sensor available!");
         }
 
         if(mMagnetometerSensor != null) {
-            Log.i("SENSOR", "Using Magnetometer sensor [" + mMagnetometerSensor.getName() + "]");
+            Log.i("SENSOR", "Using Magnetometer sensor [" + mMagnetometerSensor.getName() + "], Power: " + mMagnetometerSensor.getPower() + "mA, MinDelay: " + mMagnetometerSensor.getMinDelay() + "us, MaxRange: " + mMagnetometerSensor.getMaximumRange() + ", Resolution: " + mMagnetometerSensor.getResolution());
             mSensorManager.registerListener(this, mMagnetometerSensor, mConfiguration.SamplingInterval);
         } else {
             Log.e("SENSOR", "No Magnetometer sensor available!");
         }
 
         if(mProximitySensor != null) {
-            Log.i("SENSOR", "Using Proximity sensor [" + mProximitySensor.getName() + "]");
+            Log.i("SENSOR", "Using Proximity sensor [" + mProximitySensor.getName() + "], Power: " + mProximitySensor.getPower() + "mA, MinDelay: " + mProximitySensor.getMinDelay() + "us, MaxRange: " + mProximitySensor.getMaximumRange() + ", Resolution: " + mProximitySensor.getResolution());
             mSensorManager.registerListener(this, mProximitySensor, mConfiguration.SamplingInterval);
         } else {
             Log.e("SENSOR", "No Proximity sensor available!");
         }
 
         if(mLightSensor != null) {
-            Log.i("SENSOR", "Using Light sensor [" + mLightSensor.getName() + "]");
+            Log.i("SENSOR", "Using Light sensor [" + mLightSensor.getName() + "], Power: " + mLightSensor.getPower() + "mA, MinDelay: " + mLightSensor.getMinDelay() + "us, MaxRange: " + mLightSensor.getMaximumRange() + ", Resolution: " + mLightSensor.getResolution());
             mSensorManager.registerListener(this, mLightSensor, mConfiguration.SamplingInterval);
         } else {
             Log.e("SENSOR", "No Light sensor available!");
         }
 
         if(mPressureSensor != null) {
-            Log.i("SENSOR", "Using Pressure sensor [" + mPressureSensor.getName() + "]");
+            Log.i("SENSOR", "Using Pressure sensor [" + mPressureSensor.getName() + "], Power: " + mPressureSensor.getPower() + "mA, MinDelay: " + mPressureSensor.getMinDelay() + "us, MaxRange: " + mPressureSensor.getMaximumRange() + ", Resolution: " + mPressureSensor.getResolution());
             mSensorManager.registerListener(this, mPressureSensor, mConfiguration.SamplingInterval);
         } else {
             Log.e("SENSOR", "No Pressure sensor available!");
         }
 
         if(mAmbientTemperatureSensor != null) {
-            Log.i("SENSOR", "Using Ambient Temperature sensor [" + mAmbientTemperatureSensor.getName() + "]");
+            Log.i("SENSOR", "Using Ambient Temperature sensor [" + mAmbientTemperatureSensor.getName() + "], Power: " + mAmbientTemperatureSensor.getPower() + "mA, MinDelay: " + mAmbientTemperatureSensor.getMinDelay() + "us, MaxRange: " + mAmbientTemperatureSensor.getMaximumRange() + ", Resolution: " + mAmbientTemperatureSensor.getResolution());
             mSensorManager.registerListener(this, mAmbientTemperatureSensor, mConfiguration.SamplingInterval);
         } else {
             Log.e("SENSOR", "No Ambient Temperature sensor available!");
         }
 
         if(mLinearAccelerationSensor != null) {
-            Log.i("SENSOR", "Using Linear Acceleration sensor [" + mLinearAccelerationSensor.getName() + "]");
+            Log.i("SENSOR", "Using Linear Acceleration sensor [" + mLinearAccelerationSensor.getName() + "], Power: " + mLinearAccelerationSensor.getPower() + "mA, MinDelay: " + mLinearAccelerationSensor.getMinDelay() + "us, MaxRange: " + mLinearAccelerationSensor.getMaximumRange() + ", Resolution: " + mLinearAccelerationSensor.getResolution());
             mSensorManager.registerListener(this, mLinearAccelerationSensor, mConfiguration.SamplingInterval);
         } else {
             Log.e("SENSOR", "No Linear Acceleration sensor available!");
@@ -512,8 +518,8 @@ public class LoggingService extends Service implements SensorEventListener
 
         float[] values = {0.0f, 0.0f, 0.0f, 0.0f};
         System.arraycopy(sensorEvent.values, 0, values, 0, num_values);
-        getDBHelper().insertLogEntry(mCurrentLogSessionID, sensorEvent.timestamp,
-                log_event_type, values[0], values[1], values[2], values[3]);
+        getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(),
+                log_event_type, sensorEvent.timestamp, values[0], values[1], values[2], values[3]);
     }
 
     @Override

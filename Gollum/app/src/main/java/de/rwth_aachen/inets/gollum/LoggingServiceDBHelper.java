@@ -51,7 +51,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                 "`session_id` INTEGER," +
                 "`session_time` BIGINT," +
                 "`type` INTEGER," +
-                "`data_int_0` INTEGER NOT NULL DEFAULT '0'," +
+                "`data_int_0` BIGINT NOT NULL DEFAULT '0'," +
                 "`data_float_0` FLOAT NOT NULL DEFAULT '0'," +
                 "`data_float_1` FLOAT NOT NULL DEFAULT '0'," +
                 "`data_float_2` FLOAT NOT NULL DEFAULT '0'," +
@@ -116,7 +116,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                 "`session_id` INTEGER," +
                 "`session_time` BIGINT," +
                 "`type` INTEGER," +
-                "`data_int_0` INTEGER NOT NULL DEFAULT '0'," +
+                "`data_int_0` BIGINT NOT NULL DEFAULT '0'," +
                 "`data_float_0` FLOAT NOT NULL DEFAULT '0'," +
                 "`data_float_1` FLOAT NOT NULL DEFAULT '0'," +
                 "`data_float_2` FLOAT NOT NULL DEFAULT '0'," +
@@ -309,6 +309,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case ROTATION_VECTOR:
                             Writer.name("type").value("ROTATION_VECTOR");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("quaternion");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -319,10 +320,11 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case SCREEN_ON_OFF:
                             Writer.name("type").value("SCREEN_ON_OFF");
-                            Writer.name("is_on").value(cursor.getInt(data_int_0_idx) == 1);
+                            Writer.name("is_on").value(cursor.getLong(data_int_0_idx) == 1);
                             break;
                         case GAME_ROTATION_VECTOR:
                             Writer.name("type").value("GAME_ROTATION_VECTOR");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("quaternion");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -333,6 +335,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case GYROSCOPE:
                             Writer.name("type").value("GYROSCOPE");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("vector");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -342,6 +345,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case ACCELEROMETER:
                             Writer.name("type").value("ACCELEROMETER");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("vector");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -351,6 +355,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case MAGNETOMETER:
                             Writer.name("type").value("MAGNETOMETER");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("vector");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -360,18 +365,22 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case PROXIMITY:
                             Writer.name("type").value("PROXIMITY");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
                             break;
                         case LIGHT:
                             Writer.name("type").value("LIGHT");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
                             break;
                         case PRESSURE:
                             Writer.name("type").value("PRESSURE");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
                             break;
                         case AMBIENT_TEMPERATURE:
                             Writer.name("type").value("AMBIENT_TEMPERATURE");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
                             break;
                         case TRAFFIC_STATS:
@@ -387,15 +396,15 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case POWER_CONNECTED:
                             Writer.name("type").value("POWER_CONNECTED");
-                            Writer.name("is_connected").value(cursor.getInt(data_int_0_idx) == 1);
+                            Writer.name("is_connected").value(cursor.getLong(data_int_0_idx) == 1);
                             break;
                         case DAYDREAM_ACTIVE:
                             Writer.name("type").value("DAYDREAM_ACTIVE");
-                            Writer.name("is_active").value(cursor.getInt(data_int_0_idx) == 1);
+                            Writer.name("is_active").value(cursor.getLong(data_int_0_idx) == 1);
                             break;
                         case PHONE_CALL:
                             Writer.name("type").value("PHONE_CALL");
-                            switch(LoggingService.PhoneCallEvents.fromInt(cursor.getInt(data_int_0_idx))) {
+                            switch(LoggingService.PhoneCallEvents.fromInt((int)cursor.getLong(data_int_0_idx))) {
                                 case INCOMING_CALL: Writer.name("state").value("INCOMING_CALL"); break;
                                 case INCOMING_CALL_ATTENDED: Writer.name("state").value("INCOMING_CALL_ATTENDED"); break;
                                 case INCOMING_CALL_MISSED: Writer.name("state").value("INCOMING_CALL_MISSED"); break;
@@ -413,6 +422,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case LINEAR_ACCELERATION:
                             Writer.name("type").value("LINEAR_ACCELERATION");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("vector");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -554,6 +564,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case ROTATION_VECTOR:
                             Writer.name("type").value("ROTATION_VECTOR");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("quaternion");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -564,10 +575,11 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case SCREEN_ON_OFF:
                             Writer.name("type").value("SCREEN_ON_OFF");
-                            Writer.name("is_on").value(cursor.getInt(data_int_0_idx) == 1);
+                            Writer.name("is_on").value(cursor.getLong(data_int_0_idx) == 1);
                             break;
                         case GAME_ROTATION_VECTOR:
                             Writer.name("type").value("GAME_ROTATION_VECTOR");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("quaternion");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -578,6 +590,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case GYROSCOPE:
                             Writer.name("type").value("GYROSCOPE");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("vector");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -587,6 +600,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case ACCELEROMETER:
                             Writer.name("type").value("ACCELEROMETER");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("vector");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -596,6 +610,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case MAGNETOMETER:
                             Writer.name("type").value("MAGNETOMETER");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("vector");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -605,18 +620,22 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case PROXIMITY:
                             Writer.name("type").value("PROXIMITY");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
                             break;
                         case LIGHT:
                             Writer.name("type").value("LIGHT");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
                             break;
                         case PRESSURE:
                             Writer.name("type").value("PRESSURE");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
                             break;
                         case AMBIENT_TEMPERATURE:
                             Writer.name("type").value("AMBIENT_TEMPERATURE");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("value").value(cursor.getFloat(data_float_0_idx));
                             break;
                         case TRAFFIC_STATS:
@@ -632,15 +651,15 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case POWER_CONNECTED:
                             Writer.name("type").value("POWER_CONNECTED");
-                            Writer.name("is_connected").value(cursor.getInt(data_int_0_idx) == 1);
+                            Writer.name("is_connected").value(cursor.getLong(data_int_0_idx) == 1);
                             break;
                         case DAYDREAM_ACTIVE:
                             Writer.name("type").value("DAYDREAM_ACTIVE");
-                            Writer.name("is_active").value(cursor.getInt(data_int_0_idx) == 1);
+                            Writer.name("is_active").value(cursor.getLong(data_int_0_idx) == 1);
                             break;
                         case PHONE_CALL:
                             Writer.name("type").value("PHONE_CALL");
-                            switch(LoggingService.PhoneCallEvents.fromInt(cursor.getInt(data_int_0_idx))) {
+                            switch(LoggingService.PhoneCallEvents.fromInt((int)cursor.getLong(data_int_0_idx))) {
                                 case INCOMING_CALL: Writer.name("state").value("INCOMING_CALL"); break;
                                 case INCOMING_CALL_ATTENDED: Writer.name("state").value("INCOMING_CALL_ATTENDED"); break;
                                 case INCOMING_CALL_MISSED: Writer.name("state").value("INCOMING_CALL_MISSED"); break;
@@ -658,6 +677,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             break;
                         case LINEAR_ACCELERATION:
                             Writer.name("type").value("LINEAR_ACCELERATION");
+                            Writer.name("sensor_time").value(cursor.getLong(data_int_0_idx));
                             Writer.name("vector");
                             Writer.beginArray();
                             Writer.value(cursor.getFloat(data_float_0_idx));
@@ -695,7 +715,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         mNumRowsInInsertStatement = 0;
     }
 
-    private void addLogEntryToInsertStatement(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, int DataInt0, float DataFloat0, float DataFloat1, float DataFloat2, float DataFloat3, String DataString0)
+    private void addLogEntryToInsertStatement(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, long DataInt0, float DataFloat0, float DataFloat1, float DataFloat2, float DataFloat3, String DataString0)
     {
         if(mInsertStatement == null)
         {
@@ -711,7 +731,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         mInsertStatement.bindDouble(7, DataFloat2);
         mInsertStatement.bindDouble(8, DataFloat3);
         mInsertStatement.bindString(9, DataString0);
-        mInsertStatement.execute();
+        mInsertStatement.executeInsert();
 
         ++mNumRowsInInsertStatement;
         if(Type == LoggingService.LogEventTypes.LOG_STOPPED || mNumRowsInInsertStatement > 500)
@@ -725,14 +745,14 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, 0.0f, 0.0f, 0.0f, 0.0f, "");
     }
 
-    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, int Data0)
+    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, long Data0)
     {
         addLogEntryToInsertStatement(SessionID, SessionTime, Type, Data0, 0.0f, 0.0f, 0.0f, 0.0f, "");
     }
 
-    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, float Data0, float Data1, float Data2, float Data3)
+    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, long DataInt0, float Data0, float Data1, float Data2, float Data3)
     {
-        addLogEntryToInsertStatement(SessionID, SessionTime, Type, 0, Data0, Data1, Data2, Data3, "");
+        addLogEntryToInsertStatement(SessionID, SessionTime, Type, DataInt0, Data0, Data1, Data2, Data3, "");
     }
 
     public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, String Data0)
@@ -740,7 +760,7 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         insertLogEntry(SessionID, SessionTime, Type, 0, Data0);
     }
 
-    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, int Data0, String Data1)
+    public void insertLogEntry(long SessionID, long SessionTime, LoggingService.LogEventTypes Type, long Data0, String Data1)
     {
         if(Data1 == null)
             Data1 = "";

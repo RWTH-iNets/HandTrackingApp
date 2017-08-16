@@ -10,6 +10,9 @@ class LogEventList:
     def __getitem__(self, key):
         return self.events.__getitem__(key)
 
+    def __len__(self):
+        return self.events.__len__()
+
     def get_nearest_index(self, session_time, type_filter=None):
         min_delta_t = None
         min_delta_t_index = None
