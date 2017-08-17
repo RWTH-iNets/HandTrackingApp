@@ -1,18 +1,15 @@
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
 
 from sauron.io import load
 from sauron.classification.feature_extraction import load_features, extract_features_from_windows
+from sauron.classification.classification import Classifier
 from sauron.classification.utils import filter_windows
 
-training_features = load_features('../Data/training/features.csv')
-used_feature_indices = training_features.columns[:-2]
-print('Using features:', used_feature_indices)
-class_ids, class_names = pd.factorize(training_features['type'])
+training_data = load_features('../Data/features.csv')
 
-clf = RandomForestClassifier(n_jobs=-1)
-clf.fit(training_features[used_feature_indices], class_ids)
+clf = Classifier(clf_type='RF')
+clf.train(training_data)
 
 db = load('../Data/test/session.json')
 for session_id in db.get_all_session_ids():
@@ -31,8 +28,7 @@ for session_id in db.get_all_session_ids():
     features = extract_features_from_windows(windows)
 
     # Classify windows
-    predicted_class_ids = clf.predict(features[used_feature_indices])
-    predicted_class_names = class_names[predicted_class_ids]
+    predicted_class_names = clf.classify(features)
 
     print(predicted_class_names)
 

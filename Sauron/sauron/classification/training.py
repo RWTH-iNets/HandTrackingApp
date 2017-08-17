@@ -21,7 +21,7 @@ def extract_training_data_features_from_file(filename):
 
         match = description_re.match(session.description)
         if match is None:
-            raise RuntimeError('Invalid session description!')
+            raise RuntimeError('Invalid session description format!')
         
         session_name = match.group('name')
         session_mode = match.group('mode')
@@ -29,6 +29,9 @@ def extract_training_data_features_from_file(filename):
 
         if session_mode not in {'standing', 'walking'}:
             raise RuntimeError('Invalid session mode!')
+
+        if session_type not in {'bothhandslandscape', 'righthand', 'lefthand', 'rightpocket', 'leftpocket', 'rightear', 'leftear'}:
+            raise RuntimeError('Invalid session type!')
 
         print(' - Name:', session_name)
         print(' - Mode:', session_mode)
