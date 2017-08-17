@@ -7,11 +7,12 @@ from sauron.classification.training import extract_training_data_features_from_f
 from sauron.classification.classification import Classifier
 
 #######################################
-#training_data = extract_training_data_features_from_folder('../Data/training/')
-#training_data = training_data.dropna()
+training_data = extract_training_data_features_from_folder('../Data/training/')
+training_data = training_data.dropna()
 #save_features("../Data/training/features.csv", training_data)
-training_data = load_features('../Data/features.csv')
+#training_data = load_features('../Data/features.csv')
 
+# Perform cross-validation using 25% of the training data for testing
 training_data['is_train'] = np.random.uniform(0, 1, len(training_data)) <= .75
 training_data.head()
 

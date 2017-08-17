@@ -6,12 +6,14 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 
+from .feature_extraction import ALL_FEATURES, get_feature_names
+
 class Classifier:
     def __init__(self, clf_type='RF', clf_args=None, feature_config=None):
         self.class_ids = None
         self.class_names = None
         self.used_feature_names = self._init_feature_names(feature_config)
-        print(self.used_feature_names)
+        print(self.used_feature_names, '({} features)'.format(len(self.used_feature_names)))
 
         # Initialize classifier
         if clf_type == 'RF':
@@ -41,32 +43,9 @@ class Classifier:
     def _init_feature_names(feature_config):
         # Use default configuration if none is specified
         if feature_config is None:
-            feature_config = {
-                'accelerometer': {
-                    'method': 'axes',
-                    'features': {'mean', 'stddev', 'median', 'rms'},
-                },
-                'gyroscope': {
-                    'method': 'axes',
-                    'features': {'mean', 'stddev', 'median', 'rms'},
-                },
-            }
+            feature_config = ALL_FEATURES
 
-        # Some helper constants
-        source_to_prefixes = {
-            'accelerometer': {'accel'},
-            'gyroscope': {'gyro'},
-        }
-
-        method_to_infixes = {
-            'axes': {'x', 'y', 'z'},
-        }
-
-        # Build feature names based on configuration
-        res = []
-        for source, config in feature_config.items():
-            res.extend(prefix + '_' + infix + '_' + postfix for prefix in source_to_prefixes[source] for infix in method_to_infixes[config['method']] for postfix in config['features'])
-        return res
+        return get_feature_names(feature_config)
 
     def train(self, training_data):
         self.class_ids, self.class_names = pd.factorize(training_data['type'])

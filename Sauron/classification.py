@@ -2,15 +2,30 @@ import numpy as np
 import pandas as pd
 
 from sauron.io import load
-from sauron.classification.feature_extraction import load_features, extract_features_from_windows
+from sauron.classification.feature_extraction import load_features, extract_features_from_windows, ALL_FEATURES
 from sauron.classification.classification import Classifier
 from sauron.classification.utils import filter_windows
 
-training_data = load_features('../Data/features.csv')
+#######################################################################
+#feature_config = ALL_FEATURES
+feature_config = {
+    'accelerometer': {
+        'methods': {'axes'},
+        'features': {'mean', 'stddev', 'median', 'rms'},
+    },
+    'gyroscope': {
+        'methods': {'axes'},
+        'features': {'mean', 'stddev', 'median', 'rms'},
+    },
+}
 
-clf = Classifier(clf_type='RF')
+#######################################################################
+# Load features and train classifier
+training_data = load_features('../Data/features.csv')
+clf = Classifier(clf_type='RF', feature_config=feature_config)
 clf.train(training_data)
 
+# Load session
 db = load('../Data/test/session.json')
 for session_id in db.get_all_session_ids():
     session = db.get_session(session_id)
@@ -25,7 +40,7 @@ for session_id in db.get_all_session_ids():
     #print('  -', len(windows), 'windows after filtering')
 
     # Extract features
-    features = extract_features_from_windows(windows)
+    features = extract_features_from_windows(windows, feature_config=feature_config)
 
     # Classify windows
     predicted_class_names = clf.classify(features)
