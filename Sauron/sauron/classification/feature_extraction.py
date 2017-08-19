@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from ..logevent import AccelerometerEvent, GyroscopeEvent
+from ..logevent import AccelerometerEvent, GyroscopeEvent, MagnetometerEvent
 
 ###########################################################
 ################### Feature Naming ########################
