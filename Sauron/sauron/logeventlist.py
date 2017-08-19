@@ -43,6 +43,8 @@ class LogEventList:
         def _build_window(cur_start, cur_end, cur_events, cur_screen_on, cur_device_locked, cur_foreground_app, cur_power_connected, cur_daydream_active):
             return {
                 'events': cur_events,
+                'start': cur_start,
+                'end': cur_end,
                 'screen_on': cur_screen_on,
                 'device_locked': cur_device_locked,
                 'foreground_app': cur_foreground_app,
