@@ -380,7 +380,7 @@ public class SessionsFragment extends Fragment implements IUploadProgress {
     {
         Calendar cal = Calendar.getInstance();
         java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyMMdd_HHmmss");
-        File file = new File(Environment.DIRECTORY_DOWNLOADS, "gollum_export_" + format.format(cal.getTime()));
+        File file = new File(Environment.DIRECTORY_DOWNLOADS, "gollum_export_" + format.format(cal.getTime()) + ".json");
         if(!file.mkdirs())
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
