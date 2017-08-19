@@ -1,6 +1,6 @@
 import json
 
-from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent, PhoneCallEvent, SMSReceivedEvent, LinearAccelerationEvent
+from ..logevent import LogStartedEvent, LogStoppedEvent, RotationVectorEvent, ScreenOnOffEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, TrafficStatsEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent, PhoneCallEvent, SMSReceivedEvent, LinearAccelerationEvent, DeviceLockedEvent
 from ..logsession import LogSession
 from .utils import fix_session_event_timestamps
 
@@ -51,6 +51,7 @@ class JSONDatabase:
             'PHONE_CALL': lambda: PhoneCallEvent(session_time, event_data['state'], event_data['number'] if 'number' in event_data else None),
             'SMS_RECEIVED': lambda: SMSReceivedEvent(session_time),
             'LINEAR_ACCELERATION': lambda: LinearAccelerationEvent(session_time, *event_data['vector']),
+            'DEVICE_LOCKED': lambda: DeviceLockedEvent(session_time, event_data['is_locked']),
         }
 
         return handler_map[event_data['type']]()

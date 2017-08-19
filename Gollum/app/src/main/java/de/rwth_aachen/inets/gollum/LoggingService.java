@@ -1,5 +1,6 @@
 package de.rwth_aachen.inets.gollum;
 
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -63,7 +64,8 @@ public class LoggingService extends Service implements SensorEventListener
         DAYDREAM_ACTIVE(15),
         PHONE_CALL(16),
         SMS_RECEIVED(17),
-        LINEAR_ACCELERATION(18);
+        LINEAR_ACCELERATION(18),
+        DEVICE_LOCKED(19);
 
         private final int value;
 
@@ -130,6 +132,7 @@ public class LoggingService extends Service implements SensorEventListener
 
     private String mLastCallNumber = null;
     private String mLastCallState = null;
+    private boolean mLastDeviceLocked = false;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver()
     {
@@ -139,23 +142,42 @@ public class LoggingService extends Service implements SensorEventListener
             switch(intent.getAction())
             {
                 // Screen on/off?
-                case Intent.ACTION_SCREEN_ON:
+                case Intent.ACTION_SCREEN_ON: {
                     getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.SCREEN_ON_OFF, 1);
 
-                    if(mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON)
-                    {
+                    KeyguardManager km = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+                    if (km.inKeyguardRestrictedInputMode() != mLastDeviceLocked) {
+                        mLastDeviceLocked = km.inKeyguardRestrictedInputMode();
+                        getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.DEVICE_LOCKED, mLastDeviceLocked ? 1 : 0);
+                    }
+
+                    if (mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON) {
                         startLogging();
                     }
                     break;
-                case Intent.ACTION_SCREEN_OFF:
+                }
+                case Intent.ACTION_SCREEN_OFF: {
                     getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.SCREEN_ON_OFF, 0);
 
-                    if(mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON)
-                    {
+                    KeyguardManager km = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+                    if (km.inKeyguardRestrictedInputMode() != mLastDeviceLocked) {
+                        mLastDeviceLocked = km.inKeyguardRestrictedInputMode();
+                        getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.DEVICE_LOCKED, mLastDeviceLocked ? 1 : 0);
+                    }
+
+                    if (mConfiguration.SamplingBehavior == LoggingServiceConfiguration.SamplingBehaviors.SCREEN_ON) {
                         stopLogging();
                     }
                     break;
-
+                }
+                case Intent.ACTION_USER_PRESENT: {
+                    KeyguardManager km = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+                    if (km.inKeyguardRestrictedInputMode() != mLastDeviceLocked) {
+                        mLastDeviceLocked = km.inKeyguardRestrictedInputMode();
+                        getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.DEVICE_LOCKED, mLastDeviceLocked ? 1 : 0);
+                    }
+                    break;
+                }
                 // Daydream on/off?
                 case Intent.ACTION_DREAMING_STARTED:
                     getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.DAYDREAM_ACTIVE, 1);
@@ -353,6 +375,7 @@ public class LoggingService extends Service implements SensorEventListener
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(Intent.ACTION_DREAMING_STARTED);
         filter.addAction(Intent.ACTION_DREAMING_STOPPED);
         filter.addAction(Intent.ACTION_POWER_CONNECTED);

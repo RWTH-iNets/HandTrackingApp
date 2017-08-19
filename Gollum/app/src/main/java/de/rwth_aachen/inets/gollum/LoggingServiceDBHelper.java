@@ -430,6 +430,10 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.value(cursor.getFloat(data_float_2_idx));
                             Writer.endArray();
                             break;
+                        case DEVICE_LOCKED:
+                            Writer.name("type").value("DEVICE_LOCKED");
+                            Writer.name("is_locked").value(cursor.getLong(data_int_0_idx) == 1);
+                            break;
                     }
                     Writer.endObject();
                     i++;
@@ -684,6 +688,10 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
                             Writer.value(cursor.getFloat(data_float_1_idx));
                             Writer.value(cursor.getFloat(data_float_2_idx));
                             Writer.endArray();
+                            break;
+                        case DEVICE_LOCKED:
+                            Writer.name("type").value("DEVICE_LOCKED");
+                            Writer.name("is_locked").value(cursor.getLong(data_int_0_idx) == 1);
                             break;
                     }
                     Writer.endObject();

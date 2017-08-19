@@ -8,6 +8,7 @@ from sauron.classification.utils import filter_windows
 
 #######################################################################
 #feature_config = ALL_FEATURES
+
 feature_config = {
     'accelerometer': {
         'methods': {'axes'},

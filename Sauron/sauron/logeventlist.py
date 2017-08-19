@@ -1,4 +1,4 @@
-from .logevent import ScreenOnOffEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent
+from .logevent import ScreenOnOffEvent, DeviceLockedEvent, ForegroundApplicationEvent, PowerConnectedEvent, DaydreamActiveEvent
 
 class LogEventList:
     def __init__(self, events=None):
@@ -40,10 +40,11 @@ class LogEventList:
         return None
 
     def sliding_window(self, width, overlap_percentage, type_filter=None):
-        def _build_window(cur_start, cur_end, cur_events, cur_screen_on, cur_foreground_app, cur_power_connected, cur_daydream_active):
+        def _build_window(cur_start, cur_end, cur_events, cur_screen_on, cur_device_locked, cur_foreground_app, cur_power_connected, cur_daydream_active):
             return {
                 'events': cur_events,
                 'screen_on': cur_screen_on,
+                'device_locked': cur_device_locked,
                 'foreground_app': cur_foreground_app,
                 'power_connected': cur_power_connected,
                 'daydream_active': cur_daydream_active,
@@ -53,6 +54,7 @@ class LogEventList:
         cur_end = cur_start + width
         cur_events = []
         cur_screen_on = True
+        cur_device_locked = False
         cur_foreground_app = None
         cur_power_connected = False
         cur_daydream_active = False
@@ -62,6 +64,8 @@ class LogEventList:
         for log_event in self.events:
             if isinstance(log_event, ScreenOnOffEvent):
                 cur_screen_on = log_event.is_on
+            elif isinstance(log_event, DeviceLockedEvent):
+                cur_device_locked = log_event.is_locked
             elif isinstance(log_event, ForegroundApplicationEvent):
                 cur_foreground_app = log_event.package_name
             elif isinstance(log_event, PowerConnectedEvent):
@@ -74,12 +78,12 @@ class LogEventList:
                     cur_events.append(log_event)
                 else:
                     if cur_events:
-                        yield _build_window(cur_start, cur_end, cur_events, cur_screen_on, cur_foreground_app, cur_power_connected, cur_daydream_active)
+                        yield _build_window(cur_start, cur_end, cur_events, cur_screen_on, cur_device_locked, cur_foreground_app, cur_power_connected, cur_daydream_active)
 
                     cur_start = cur_end - overlap
                     cur_end = cur_start + width
                     cur_events = [x for x in cur_events if x.session_time >= cur_start and x.session_time < cur_end]
 
         if cur_events:
-            yield _build_window(cur_start, cur_end, cur_events, cur_screen_on, cur_foreground_app, cur_power_connected, cur_daydream_active)
+            yield _build_window(cur_start, cur_end, cur_events, cur_screen_on, cur_device_locked, cur_foreground_app, cur_power_connected, cur_daydream_active)
 

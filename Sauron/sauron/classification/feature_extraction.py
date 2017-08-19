@@ -9,8 +9,9 @@ from ..logevent import AccelerometerEvent, GyroscopeEvent
 _SOURCE_PREFIXES = {
     'accelerometer': {'accel'},
     'gyroscope': {'gyro'},
+    'magnetometer': {'magneto'},
 
-    'all': {'accel', 'gyro'},
+    'all': {'accel', 'gyro', 'magneto'},
 }
 
 _METHOD_INFIXES = {
@@ -109,6 +110,14 @@ def extract_features_from_windows(windows, feature_config=ALL_FEATURES):
             values['gyro'] = _build_features({'x': [e.vector.x for e in gyro_events], 'y': [e.vector.y for e in gyro_events], 'z': [e.vector.z for e in gyro_events]})
         else:
             values['gyro'] = _build_features({'x': None, 'y': None, 'z': None})
+
+        # Magnetometer
+        magneto_events = [e for e in window['events'] if isinstance(e, MagnetometerEvent)]
+        if magneto_events:
+            values['magneto'] = _build_features({'x': [e.vector.x for e in magneto_events], 'y': [e.vector.y for e in magneto_events], 'z': [e.vector.z for e in magneto_events]})
+        else:
+            values['magneto'] = _build_features({'x': None, 'y': None, 'z': None})
+
 
         # Insert features to DataFrame
         # TODO: this is highly inefficient and should be optimized

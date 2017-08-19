@@ -1,5 +1,6 @@
 def is_active_usage(window):
-    return window['screen_on'] and not window['daydream_active']
+    # TODO: what about incoming phone call while device is locked?
+    return window['screen_on'] and not window['daydream_active'] and not window['device_locked']
 
 def filter_windows(windows, active_usage=None, foreground_app=None, power_connected=None):
     for window in windows:

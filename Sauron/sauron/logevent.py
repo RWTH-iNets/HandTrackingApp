@@ -123,6 +123,12 @@ class LinearAccelerationEvent(LogEventBase):
         self.vector = Vector3(x, y, z)
 
 
+class DeviceLockedEvent(LogEventBase):
+    def __init__(self, session_time, is_locked):
+        super().__init__(session_time)
+        self.is_locked = is_locked
+
+
 def is_sensor_event(event):
     return type(event) in (RotationVectorEvent, GameRotationVectorEvent, GyroscopeEvent, AccelerometerEvent, MagnetometerEvent, ProximitySensorEvent, LightSensorEvent, PressureSensorEvent, AmbientTemperatureSensorEvent, LinearAccelerationEvent)
 
