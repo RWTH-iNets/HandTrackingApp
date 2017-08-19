@@ -169,7 +169,7 @@ public class SessionsFragment extends Fragment implements IUploadProgress {
         File public_storage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         public_storage.mkdirs();
 
-        File file = new File(public_storage, "gollum_export_" + format.format(cal.getTime()));
+        File file = new File(public_storage, "gollum_export_" + format.format(cal.getTime()) + ".json");
         /*if(!file.mkdirs())
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -374,47 +374,6 @@ public class SessionsFragment extends Fragment implements IUploadProgress {
                 return true;
         }
         return false;
-    }
-
-    private void saveDataToFile(String data)
-    {
-        Calendar cal = Calendar.getInstance();
-        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyMMdd_HHmmss");
-        File file = new File(Environment.DIRECTORY_DOWNLOADS, "gollum_export_" + format.format(cal.getTime()) + ".json");
-        if(!file.mkdirs())
-        {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setMessage(R.string.sessions_export_error)
-                    .setPositiveButton(R.string.ok, null)
-                    .show();
-            return;
-        }
-        FileWriter writer;
-        try {
-            writer = new FileWriter(file);
-        } catch (IOException e) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setMessage(R.string.sessions_export_error)
-                    .setPositiveButton(R.string.ok, null)
-                    .show();
-            return;
-        }
-
-        try {
-            writer.write(data);
-            writer.close();
-        } catch (IOException e) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setMessage(R.string.sessions_export_error)
-                    .setPositiveButton(R.string.ok, null)
-                    .show();
-            return;
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setMessage(R.string.sessions_export_successful)
-                .setPositiveButton(R.string.ok, null)
-                .show();
     }
 
     @Override
