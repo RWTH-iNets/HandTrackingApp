@@ -13,7 +13,7 @@ class Classifier:
         self.class_ids = None
         self.class_names = None
         self.used_feature_names = self._init_feature_names(feature_config)
-        print(self.used_feature_names, '({} features)'.format(len(self.used_feature_names)))
+        #print(self.used_feature_names, '({} features)'.format(len(self.used_feature_names)))
 
         # Initialize classifier
         if clf_type == 'RF':
