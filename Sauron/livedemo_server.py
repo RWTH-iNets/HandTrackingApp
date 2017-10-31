@@ -103,6 +103,7 @@ class UploadHandler:
 
             # Extract features
             features = extract_features_from_windows(windows, feature_config=feature_config)
+            features = features.dropna();
 
             # Classify windows
             predicted_class_names = clf.classify(features)
@@ -121,7 +122,7 @@ class UploadHandler:
                 
                 current_class = predicted_class_names[0]
                 active_usage = is_active_usage(windows[0])
-                foreground_app = windows[0]['foreground_app']
+                foreground_app = windows[0]['foreground_app'] if windows[0]['foreground_app'] is not None else foreground_app
                 
                 #print(current_class)
 
