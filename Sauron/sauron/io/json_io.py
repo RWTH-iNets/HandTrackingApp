@@ -6,13 +6,18 @@ from .utils import fix_session_event_timestamps
 
 
 class JSONDatabase:
-    def __init__(self, filename):
-        with open(filename) as in_file:
-            data = json.load(in_file)
-            
-            session_list = [self._logsession_from_json(session_data) for session_data in data]
-            self.sessions = {session.session_id: session for session in session_list}
-                            
+    def __init__(self, filename=None, buffer=None):
+        if filename is not None:
+            with open(filename) as in_file:
+                data = json.load(in_file)
+        elif buffer is not None:
+            data = json.loads(buffer)
+        else:
+            raise ValueError('Either filename or buffer must be specified!')
+        
+        session_list = [self._logsession_from_json(session_data) for session_data in data]
+        self.sessions = {session.session_id: session for session in session_list}
+
     @staticmethod
     def _logsession_from_json(session_data):
         session = LogSession(int(session_data['id']), session_data['description'], session_data['start_time'], session_data['sampling_behavior'], session_data['sampling_interval'] / 1000)

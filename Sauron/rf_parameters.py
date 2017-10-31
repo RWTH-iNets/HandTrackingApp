@@ -136,5 +136,5 @@ print('-------------------------------------------------------------------')
 
 # Print accuracies
 print(accuracies)
-accuracies = accuracies.reindex_axis(config['classes'], axis=1)
+accuracies = accuracies.reindex_axis(['n_estimators', 'min_samples_leaf', 'max_features'] + config['classes'], axis=1)
 accuracies.to_csv('output/RF_Parameters/RF_accuracies.csv', sep='&', float_format='%.2f')
