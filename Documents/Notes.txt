@@ -3,3 +3,6 @@ TYPE_GAME_ROTATION_VECTOR instead of TYPE_ROTATION_VECTOR, because https://devel
 
 
 logging as foreground service in order to ensure not being killed by the system at any point
+
+
+psychological bias by explaining training to people before they perform the actions. might be improved by letting them e.g. watch a youtube video (for portrait mode training) and extracting data afterwards.

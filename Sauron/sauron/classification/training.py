@@ -11,7 +11,7 @@ def extract_training_data_features_from_file(filename):
     print('Loading training data from', filename)
     db = load(filename)
 
-    description_re = re.compile('^training_(?P<name>[A-Za-z]+)_(?P<mode>[A-Za-z]+)_(?P<type>[A-Za-z]+)$')
+    description_re = re.compile('^training_(?P<name>[A-Za-z0-9]+)_(?P<mode>[A-Za-z]+)_(?P<type>[A-Za-z]+)$')
 
     feature_set = []
     for session_id in db.get_all_session_ids():
@@ -50,7 +50,7 @@ def extract_training_data_features_from_file(filename):
 def extract_training_data_features_from_folder(foldername):
     feature_sets = []
     for root, dirs, files in os.walk(foldername):
-        for file in files:
+        for file in (f for f in files if f.endswith('.json')):
             feature_sets.append(extract_training_data_features_from_file(os.path.join(root, file)))
 
     return pd.concat(feature_sets)

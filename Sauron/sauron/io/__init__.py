@@ -10,6 +10,12 @@ def load(filepath):
     if extension == '.db':
         return SQLiteDatabase(filepath)
     elif extension == '.json':
-        return JSONDatabase(filepath)
+        return JSONDatabase(filename=filepath)
     else:
         raise ValueError('Unknown file extension "{}"!'.format(extension))
+
+def loads(buffer, fileformat):    
+    if fileformat == 'json':
+        return JSONDatabase(buffer=buffer)
+    else:
+        raise ValueError('Unknown buffer format "{}"!'.format(fileformat))
