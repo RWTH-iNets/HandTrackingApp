@@ -366,6 +366,7 @@ public class LoggingService extends Service implements SensorEventListener
 
         //this needs to come after listeners have been detached.
         getDBHelper().insertLogEntry(mCurrentLogSessionID, SystemClock.elapsedRealtimeNanos(), LogEventTypes.LOG_STOPPED);
+        getDBHelper().finishLogSession(mCurrentLogSessionID);
 
         stopForeground(true);
     }

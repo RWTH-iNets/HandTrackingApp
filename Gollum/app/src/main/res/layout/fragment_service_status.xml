@@ -41,17 +41,32 @@
                 android:ems="10"
                 android:hint="@string/service_status_sessionname_hint"
                 android:inputType="text" />
-        </LinearLayout>
 
-        <Button
-            android:id="@+id/service_status_startstopbutton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/service_status_start" />
+        </LinearLayout>
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="20dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/service_status_livedemo"
+                android:layout_width="20dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Live Demo" />
+
+            <Button
+                android:id="@+id/service_status_startstopbutton"
+                android:layout_width="20dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/service_status_start" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/textView4"

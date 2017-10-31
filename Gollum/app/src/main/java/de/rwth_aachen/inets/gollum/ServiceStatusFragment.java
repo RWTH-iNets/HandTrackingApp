@@ -13,9 +13,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.media.tv.TvInputService;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
 import android.support.v4.app.ActivityCompat;
@@ -23,6 +26,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.database.DatabaseUtilsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
+import android.util.JsonWriter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,7 +42,15 @@ import android.widget.TextView;
 import com.rvalerio.fgchecker.AppChecker;
 import com.rvalerio.fgchecker.Utils;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -66,10 +78,13 @@ public class ServiceStatusFragment extends Fragment {
     TextView serviceStatus;
     EditText sessionName;
     Button startStopButton;
+    Button liveDemoButton;
     EditText trainingModeUsername;
     ArrayList<Button> trainingModeButtons;
     RadioButton trainingModeType_StandingStill;
     RadioButton trainingModeType_Walking;
+
+    private boolean forceStop = false;
 
     private boolean isServiceRunning = false;
     private String currentSessionName = "";
@@ -110,6 +125,17 @@ public class ServiceStatusFragment extends Fragment {
                         } else {
                             startService(sessionName.getText().toString());
                         }
+                    }
+                }
+            });
+
+            liveDemoButton = (Button) v.findViewById(R.id.service_status_livedemo);
+            liveDemoButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Start/stop service
+                    if (!isServiceRunning) {
+                        startLiveDemoMode();
                     }
                 }
             });
@@ -198,6 +224,72 @@ public class ServiceStatusFragment extends Fragment {
         return game_sensor_found;
     }
 
+    private void startLiveDemoMode()
+    {
+        Calendar cal = Calendar.getInstance();
+        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyMMdd_HHmmss");
+        startService("live_demo_" + format.format(cal.getTime()));
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(forceStop)
+                    return;
+
+                stopService();
+
+                LoggingServiceDBHelper db = LoggingServiceDBHelper.getInstance(getContext());
+                ArrayList<Long> SessionIds = db.getSessionsByName(currentSessionName);
+                if (SessionIds.size() > 0) {
+                    final long SessionId = SessionIds.get(0);
+
+                    final Handler newHandler = new Handler();
+                    newHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            LoggingServiceDBHelper db = LoggingServiceDBHelper.getInstance(getContext());
+
+                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                            StrictMode.setThreadPolicy(policy);
+
+                            try {
+                                HttpURLConnection con = (HttpURLConnection) ((new URL("http://alexander-pc:8080/upload")).openConnection());
+                                con.setDoOutput(true);
+                                //con.setChunkedStreamingMode(0);
+                                con.setRequestMethod("POST");
+                                con.addRequestProperty("Content-Type", "application/json; charset=utf-8");
+                                con.connect();
+
+                                final OutputStream outputStream = con.getOutputStream();
+                                final OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream, "UTF-8");
+                                final JsonWriter writer = new JsonWriter(outputWriter);
+                                writer.beginArray();
+                                db.exportSessionToJSON(SessionId, writer);
+                                writer.endArray();
+
+                                writer.flush();
+                                writer.close();
+
+                                if (con.getResponseCode() == 200) {
+                                    Log.e("WARN", "HTTP Error Code: " + Integer.toString(con.getResponseCode()));
+                                }
+
+                                con.disconnect();
+                            } catch (Exception e) {
+                                Log.e("WARN", e.toString());
+                            }
+
+                            db.deleteSession(SessionId);
+                        }
+                    }, 50);
+                }
+
+                startLiveDemoMode();
+            }
+        }, 500);
+    }
+
     private void startService(final String NewSessionName, long delayMillis, long timeoutMillis)
     {
         sessionName.setText("Service starting in " + Long.toString(delayMillis) + "ms!");
@@ -207,6 +299,9 @@ public class ServiceStatusFragment extends Fragment {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                if(forceStop)
+                    return;
+
                 startService(NewSessionName);
 
                 try {
@@ -223,6 +318,9 @@ public class ServiceStatusFragment extends Fragment {
         handler2.postDelayed(new Runnable() {
             @Override
             public void run() {
+                if(forceStop)
+                    return;
+
                 stopService();
 
                 try {
@@ -262,6 +360,7 @@ public class ServiceStatusFragment extends Fragment {
         }
         else
         {
+            forceStop = false;
             LoggingServiceConfiguration config = new LoggingServiceConfiguration(PreferenceManager.getDefaultSharedPreferences(getActivity()));
             config.SessionName = NewSessionName;
 
@@ -287,6 +386,7 @@ public class ServiceStatusFragment extends Fragment {
         }
         else
         {
+            forceStop = true;
             getActivity().stopService(new Intent(getActivity().getApplicationContext(), LoggingService.class));
         }
 
@@ -314,6 +414,7 @@ public class ServiceStatusFragment extends Fragment {
     private void setInputEnabled(boolean enabled)
     {
         sessionName.setEnabled(enabled);
+        liveDemoButton.setEnabled(enabled);
 
         trainingModeUsername.setEnabled(enabled);
         for(Button btn:trainingModeButtons)

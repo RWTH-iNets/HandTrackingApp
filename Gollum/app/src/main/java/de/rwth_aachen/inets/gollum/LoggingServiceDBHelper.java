@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-
+import java.util.ArrayList;
 
 
 final class LoggingServiceDBHelper extends SQLiteOpenHelper
@@ -214,6 +214,22 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
 
         c.moveToFirst();
         int res = c.getInt(0);
+        c.close();
+
+        return res;
+    }
+
+    public ArrayList<Long> getSessionsByName(String name)
+    {
+        ArrayList<Long> res = new ArrayList<>();
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query("log_sessions", new String[]{"id"}, "description=?", new String[]{name}, null, null, null);
+        int iId = c.getColumnIndex("id");
+        for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
+        {
+            res.add((long)c.getInt(iId));
+        }
         c.close();
 
         return res;
@@ -773,5 +789,10 @@ final class LoggingServiceDBHelper extends SQLiteOpenHelper
         if(Data1 == null)
             Data1 = "";
         addLogEntryToInsertStatement(SessionID, SessionTime, Type, Data0, 0.0f, 0.0f, 0.0f, 0.0f, Data1);
+    }
+
+    public void finishLogSession(long SessionID)
+    {
+        flushInsertStatement();
     }
 }
